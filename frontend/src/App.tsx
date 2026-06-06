@@ -5,6 +5,8 @@ import PlanetInfo from "./components/PlanetInfo";
 function App() {
   const [selectedPlanet, setSelectedPlanet] =
   useState<string | null>(null);
+  const [enteredUniverse, setEnteredUniverse] =
+  useState(false);
   return (
     <div
       style={{
@@ -23,6 +25,7 @@ function App() {
   selectedPlanet={selectedPlanet}
 />
 
+      {!enteredUniverse && (
       <div
         style={{
           position: "absolute",
@@ -33,6 +36,8 @@ function App() {
           textAlign: "center",
         }}
       >
+        
+
         <h1
           style={{
             fontSize: "4rem",
@@ -58,11 +63,14 @@ function App() {
     cursor: "pointer",
     fontSize: "1rem",
   }}
+  onClick={() => setEnteredUniverse(true)}
 >
   ENTER UNIVERSE
 </button>
       </div>
+      )}
     </div>
+    
   );
 }
 
