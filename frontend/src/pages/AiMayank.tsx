@@ -1,14 +1,15 @@
 import PlanetPageLayout
 from "../components/PlanetPageLayout";
 
+import AiChat
+from "../components/AiChat";
+
 export default function AiMayank() {
   return (
     <PlanetPageLayout
       title="AI Mayank"
     >
-      <p>
-        Future AI-powered digital twin.
-      </p>
-</PlanetPageLayout>
+      <AiChat />
+    </PlanetPageLayout>
   );
 }
