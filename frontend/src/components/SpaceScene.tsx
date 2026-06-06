@@ -6,6 +6,14 @@ import BlackHole from "./BlackHole";
 import Planet from "./Planet";
 import { planets } from "../data/planets";
 
+type SpaceSceneProps = {
+  selectedPlanet: string | null;
+
+  setSelectedPlanet: (
+    planet: string | null
+  ) => void;
+};
+
 function MovingCamera() {
   const groupRef = useRef<THREE.Group>(null);
 
@@ -34,8 +42,13 @@ function MovingCamera() {
   );
 }
 
-export default function SpaceScene() {
+export default function SpaceScene({
+  selectedPlanet,
+  setSelectedPlanet,
+}: SpaceSceneProps)  {
+    
   return (
+    
     <Canvas camera={{ position: [0, 0, 5] }}>
       <ambientLight intensity={0.5} />
       <MovingCamera />
@@ -43,11 +56,13 @@ export default function SpaceScene() {
       {
   planets.map((planet) => (
     <Planet
-      key={planet.name}
-      name={planet.name}
-      color={planet.color}
-      position={planet.position}
-    />
+  key={planet.name}
+  name={planet.name}
+  color={planet.color}
+  position={planet.position}
+  selectedPlanet={selectedPlanet}
+  setSelectedPlanet={setSelectedPlanet}
+/>
   ))
 }
     </Canvas>

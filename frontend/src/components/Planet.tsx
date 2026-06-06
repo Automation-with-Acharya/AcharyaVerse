@@ -7,12 +7,20 @@ type PlanetProps = {
   position: [number, number, number];
   color: string;
   name: string;
+
+  selectedPlanet: string | null;
+
+  setSelectedPlanet: (
+    name: string | null
+  ) => void;
 };
 
 export default function Planet({
   position,
   color,
   name,
+  selectedPlanet,
+  setSelectedPlanet,
 }: PlanetProps) {
   const ref = useRef<THREE.Mesh>(null);
 
@@ -23,7 +31,13 @@ export default function Planet({
 
     ref.current.rotation.y += 0.01;
 
-    const scale = hovered ? 1.2 : 1;
+    let scale = 1;
+
+if (hovered)
+  scale = 1.2;
+
+if (selectedPlanet === name)
+  scale = 2;
 
     ref.current.scale.set(scale, scale, scale);
   });
@@ -41,7 +55,9 @@ export default function Planet({
         document.body.style.cursor = "default";
         setHovered(false);
       }}
-      onClick={() => console.log(`Entering ${name}`)}
+      onClick={() => {
+  setSelectedPlanet(name);
+}}
     >
       <sphereGeometry args={[0.7, 64, 64]} />
 

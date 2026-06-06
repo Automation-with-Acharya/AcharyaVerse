@@ -1,6 +1,10 @@
 import SpaceScene from "./components/SpaceScene";
+import { useState } from "react";
+import PlanetInfo from "./components/PlanetInfo";
 
 function App() {
+  const [selectedPlanet, setSelectedPlanet] =
+  useState<string | null>(null);
   return (
     <div
       style={{
@@ -10,7 +14,14 @@ function App() {
         background: "black",
       }}
     >
-      <SpaceScene />
+      <SpaceScene
+  selectedPlanet={selectedPlanet}
+  setSelectedPlanet={setSelectedPlanet}
+/>
+
+<PlanetInfo
+  selectedPlanet={selectedPlanet}
+/>
 
       <div
         style={{
