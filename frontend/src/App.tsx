@@ -38,6 +38,18 @@ function App() {
         >
           Exploring Software, AI and Physics
         </p>
+        <button
+  style={{
+    marginTop: "25px",
+    padding: "12px 30px",
+    borderRadius: "10px",
+    border: "none",
+    cursor: "pointer",
+    fontSize: "1rem",
+  }}
+>
+  ENTER UNIVERSE
+</button>
       </div>
     </div>
   );

@@ -1,20 +1,43 @@
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { Stars } from "@react-three/drei";
+import { useRef } from "react";
+import * as THREE from "three";
+import BlackHole from "./BlackHole";
 
-export default function SpaceScene() {
+function MovingCamera() {
+  const groupRef = useRef<THREE.Group>(null);
+
+  useFrame(({ clock }) => {
+    if (!groupRef.current) return;
+
+    groupRef.current.rotation.y =
+      Math.sin(clock.getElapsedTime() * 0.05) * 0.1;
+
+    groupRef.current.rotation.x =
+      Math.cos(clock.getElapsedTime() * 0.03) * 0.05;
+  });
+
   return (
-    <Canvas camera={{ position: [0, 0, 5] }}>
-      <ambientLight intensity={0.5} />
-
+    <group ref={groupRef}>
       <Stars
         radius={100}
         depth={50}
-        count={5000}
+        count={8000}
         factor={4}
         saturation={0}
         fade
         speed={1}
       />
+    </group>
+  );
+}
+
+export default function SpaceScene() {
+  return (
+    <Canvas camera={{ position: [0, 0, 5] }}>
+      <ambientLight intensity={0.5} />
+      <MovingCamera />
+      <BlackHole />
     </Canvas>
   );
 }
