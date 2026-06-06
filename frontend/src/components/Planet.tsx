@@ -41,7 +41,7 @@ export default function Planet({
         document.body.style.cursor = "default";
         setHovered(false);
       }}
-      onClick={() => alert(`Entering ${name}`)}
+      onClick={() => console.log(`Entering ${name}`)}
     >
       <sphereGeometry args={[0.7, 64, 64]} />
 

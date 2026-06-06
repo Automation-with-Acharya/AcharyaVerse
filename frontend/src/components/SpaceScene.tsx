@@ -4,6 +4,7 @@ import { useRef } from "react";
 import * as THREE from "three";
 import BlackHole from "./BlackHole";
 import Planet from "./Planet";
+import { planets } from "../data/planets";
 
 function MovingCamera() {
   const groupRef = useRef<THREE.Group>(null);
@@ -39,29 +40,16 @@ export default function SpaceScene() {
       <ambientLight intensity={0.5} />
       <MovingCamera />
       <BlackHole />
-      <Planet
-  position={[-4, 2, 0]}
-  color="blue"
-  name="Projects"
-/>
-
-<Planet
-  position={[4, 2, 0]}
-  color="green"
-  name="Skills"
-/>
-
-<Planet
-  position={[-4, -2, 0]}
-  color="orange"
-  name="Experience"
-/>
-
-<Planet
-  position={[4, -2, 0]}
-  color="purple"
-  name="AI Mayank"
-/>
+      {
+  planets.map((planet) => (
+    <Planet
+      key={planet.name}
+      name={planet.name}
+      color={planet.color}
+      position={planet.position}
+    />
+  ))
+}
     </Canvas>
   );
 }
