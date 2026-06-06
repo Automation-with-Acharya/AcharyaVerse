@@ -9,7 +9,7 @@ function OrbitRing({
 }: {
   radius: number;
 }) {
-  const points = [];
+  const points: [number, number, number][] = [];
 
   for (
     let i = 0;
