@@ -1,4 +1,4 @@
-export default function Experience() {
+export default function PhysicsLab() {
   return (
     <div
       style={{
@@ -8,14 +8,11 @@ export default function Experience() {
         padding: "40px",
       }}
     >
-      <h1>Experience Planet</h1>
+      <h1>Physics Lab</h1>
 
       <p>
-        Bank of America Continuum India
-      </p>
-
-      <p>
-        Software Engineer
+        Gravity simulations, orbital mechanics,
+        black holes and physics experiments.
       </p>
     </div>
   );
