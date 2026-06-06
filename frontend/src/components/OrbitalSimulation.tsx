@@ -1,9 +1,9 @@
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import * as THREE from "three";
 import { Line } from "@react-three/drei";
 import { Text } from "@react-three/drei";
-import { useState } from "react";
+
 
 function OrbitRing({
   radius,
@@ -176,15 +176,18 @@ const [paused, setPaused] =
   style={{
     marginTop: "20px",
     color: "white",
+    maxWidth: "600px",
   }}
 >
   <h3>
     Physics Controls
   </h3>
 
-  
-
-  <div>
+  <div
+    style={{
+      marginBottom: "15px",
+    }}
+  >
     Earth Speed:
     <input
       type="range"
@@ -197,10 +200,17 @@ const [paused, setPaused] =
           Number(e.target.value)
         )
       }
+      style={{
+        width: "100%",
+      }}
     />
   </div>
 
-  <div>
+  <div
+    style={{
+      marginBottom: "15px",
+    }}
+  >
     Moon Speed:
     <input
       type="range"
@@ -213,6 +223,9 @@ const [paused, setPaused] =
           Number(e.target.value)
         )
       }
+      style={{
+        width: "100%",
+      }}
     />
   </div>
 
@@ -220,16 +233,25 @@ const [paused, setPaused] =
     onClick={() =>
       setPaused(!paused)
     }
+    style={{
+  padding: "10px 20px",
+  cursor: "pointer",
+  background: "#2563eb",
+  color: "white",
+  border: "none",
+  borderRadius: "8px",
+}}
   >
     {paused
-      ? "Resume"
-      : "Pause"}
+      ? "Resume Simulation"
+      : "Pause Simulation"}
   </button>
-
+  
   <div
   style={{
     marginTop: "30px",
-    color: "#ccc",
+    color: "#cccccc",
+    maxWidth: "700px",
   }}
 >
   <h3>
@@ -237,18 +259,22 @@ const [paused, setPaused] =
   </h3>
 
   <p>
-    Earth revolves around the Sun
+    Earth revolves around the Sun,
     while the Moon revolves around
     Earth.
   </p>
 
   <p>
-    This demonstrates hierarchical
-    orbital motion using nested
-    coordinate systems.
+    This simulation demonstrates
+    hierarchical orbital motion
+    using nested coordinate
+    systems.
   </p>
 </div>
 </div>
+
+
+
     </>
   );
 }
