@@ -15,7 +15,11 @@ export default function BlackHole() {
   return (
     <mesh ref={meshRef} position={[0, 0, -5]}>
       <sphereGeometry args={[0.6, 64, 64]} />
-      <meshStandardMaterial color="black" />
+      <meshStandardMaterial
+  color="#111111"
+  emissive="#2200ff"
+  emissiveIntensity={0.4}
+/>
     </mesh>
   );
 }

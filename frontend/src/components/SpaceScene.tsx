@@ -39,10 +39,29 @@ export default function SpaceScene() {
       <ambientLight intensity={0.5} />
       <MovingCamera />
       <BlackHole />
-      <Planet position={[-4, 2, 0]} color="blue" />
-    <Planet position={[4, 2, 0]} color="green" />
-    <Planet position={[-4, -2, 0]} color="orange" />
-    <Planet position={[4, -2, 0]} color="purple" />
+      <Planet
+  position={[-4, 2, 0]}
+  color="blue"
+  name="Projects"
+/>
+
+<Planet
+  position={[4, 2, 0]}
+  color="green"
+  name="Skills"
+/>
+
+<Planet
+  position={[-4, -2, 0]}
+  color="orange"
+  name="Experience"
+/>
+
+<Planet
+  position={[4, -2, 0]}
+  color="purple"
+  name="AI Mayank"
+/>
     </Canvas>
   );
 }
