@@ -3,6 +3,7 @@ import { useRef } from "react";
 import * as THREE from "three";
 import { Line } from "@react-three/drei";
 import { Text } from "@react-three/drei";
+import { useState } from "react";
 
 function OrbitRing({
   radius,
@@ -39,7 +40,15 @@ function OrbitRing({
   );
 }
 
-function EarthSystem() {
+function EarthSystem({
+  earthSpeed,
+  moonSpeed,
+  paused,
+}: {
+  earthSpeed: number;
+  moonSpeed: number;
+  paused: boolean;
+}) {
   const earthOrbit =
     useRef<THREE.Group>(null);
 
@@ -48,12 +57,16 @@ function EarthSystem() {
 
   useFrame(() => {
     if (earthOrbit.current)
-      earthOrbit.current.rotation.y +=
-        0.01;
+      if (!paused) {
+  earthOrbit.current.rotation.y +=
+    earthSpeed;
+}
 
     if (moonOrbit.current)
-      moonOrbit.current.rotation.y +=
-        0.04;
+      if (!paused) {
+  moonOrbit.current.rotation.y +=
+    moonSpeed;
+}
   });
 
   return (
@@ -126,8 +139,20 @@ function EarthSystem() {
 }
 
 export default function OrbitalSimulation() {
+const [earthSpeed, setEarthSpeed] =
+  useState(0.01);
+
+const [moonSpeed, setMoonSpeed] =
+  useState(0.04);
+
+const [paused, setPaused] =
+  useState(false);
+
   return (
+    <>
     <Canvas
+
+    
       style={{
         height: "600px",
       }}
@@ -140,7 +165,90 @@ export default function OrbitalSimulation() {
         intensity={2}
       />
 
-      <EarthSystem />
+      <EarthSystem
+  earthSpeed={earthSpeed}
+  moonSpeed={moonSpeed}
+  paused={paused}
+/>
     </Canvas>
+
+    <div
+  style={{
+    marginTop: "20px",
+    color: "white",
+  }}
+>
+  <h3>
+    Physics Controls
+  </h3>
+
+  
+
+  <div>
+    Earth Speed:
+    <input
+      type="range"
+      min="0"
+      max="0.05"
+      step="0.001"
+      value={earthSpeed}
+      onChange={(e) =>
+        setEarthSpeed(
+          Number(e.target.value)
+        )
+      }
+    />
+  </div>
+
+  <div>
+    Moon Speed:
+    <input
+      type="range"
+      min="0"
+      max="0.1"
+      step="0.001"
+      value={moonSpeed}
+      onChange={(e) =>
+        setMoonSpeed(
+          Number(e.target.value)
+        )
+      }
+    />
+  </div>
+
+  <button
+    onClick={() =>
+      setPaused(!paused)
+    }
+  >
+    {paused
+      ? "Resume"
+      : "Pause"}
+  </button>
+
+  <div
+  style={{
+    marginTop: "30px",
+    color: "#ccc",
+  }}
+>
+  <h3>
+    Orbital Mechanics
+  </h3>
+
+  <p>
+    Earth revolves around the Sun
+    while the Moon revolves around
+    Earth.
+  </p>
+
+  <p>
+    This demonstrates hierarchical
+    orbital motion using nested
+    coordinate systems.
+  </p>
+</div>
+</div>
+    </>
   );
 }
