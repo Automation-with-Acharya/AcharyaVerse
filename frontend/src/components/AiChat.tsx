@@ -67,52 +67,95 @@ export default function AiChat() {
     <div>
       <div
         style={{
-          minHeight: "300px",
-          border: "1px solid #444",
-          padding: "15px",
-          marginBottom: "20px",
-        }}
+  height: "500px",
+  overflowY: "auto",
+  border: "1px solid #333",
+  padding: "20px",
+  marginBottom: "20px",
+  borderRadius: "12px",
+  background: "#0f172a",
+}}
       >
         {messages.map(
-          (message, index) => (
-            <div
-              key={index}
-              style={{
-                marginBottom: "10px",
-              }}
-            >
-              <strong>
-                {message.sender ===
-                "user"
-                  ? "You"
-                  : "AI Mayank"}
-                :
-              </strong>{" "}
-              {message.text}
-            </div>
-          )
-        )}
+  (message, index) => (
+    <div
+      key={index}
+      style={{
+        display: "flex",
+        justifyContent:
+          message.sender === "user"
+            ? "flex-end"
+            : "flex-start",
+        marginBottom: "12px",
+      }}
+    >
+      <div
+        style={{
+          background:
+            message.sender === "user"
+              ? "#2563eb"
+              : "#1e293b",
+
+          padding: "12px",
+
+          borderRadius: "12px",
+
+          maxWidth: "70%",
+
+          color: "white",
+        }}
+      >
+        <strong>
+          {message.sender === "user"
+            ? "You"
+            : "AI Mayank"}
+        </strong>
+
+        <div
+          style={{
+            marginTop: "5px",
+          }}
+        >
+          {message.text}
+        </div>
+      </div>
+    </div>
+  )
+)}
       </div>
 
       <input
+      autoFocus
         value={input}
         onChange={(e) =>
           setInput(
             e.target.value
           )
         }
+        onKeyDown={(e) => {
+  if (e.key === "Enter") {
+    sendMessage();
+  }
+}}
         style={{
-          width: "70%",
-          padding: "10px",
-        }}
+  width: "80%",
+  padding: "12px",
+  borderRadius: "8px",
+  border: "1px solid #444",
+}}
       />
 
       <button
         onClick={sendMessage}
         style={{
-          marginLeft: "10px",
-          padding: "10px",
-        }}
+  marginLeft: "10px",
+  padding: "12px 18px",
+  background: "#2563eb",
+  color: "white",
+  border: "none",
+  borderRadius: "8px",
+  cursor: "pointer",
+}}
       >
         Send
       </button>
