@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export default function PhysicsLab() {
   return (
     <div
@@ -8,6 +10,16 @@ export default function PhysicsLab() {
         padding: "40px",
       }}
     >
+<Link
+  to="/"
+  style={{
+    color: "cyan",
+    textDecoration: "none",
+  }}
+>
+  ← Return To Universe
+</Link>
+
       <h1>Physics Lab</h1>
 
       <p>

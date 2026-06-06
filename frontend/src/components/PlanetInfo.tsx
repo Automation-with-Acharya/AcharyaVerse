@@ -1,4 +1,5 @@
 import { planetContent } from "../data/planetContent";
+import { useNavigate } from "react-router-dom";
 
 
 type Props = {
@@ -8,6 +9,32 @@ type Props = {
 export default function PlanetInfo({
   selectedPlanet,
 }: Props) {
+    const navigate = useNavigate();
+
+    const openPlanet = () => {
+  switch (selectedPlanet) {
+    case "Projects":
+      navigate("/projects");
+      break;
+
+    case "Skills":
+      navigate("/skills");
+      break;
+
+    case "Experience":
+      navigate("/experience");
+      break;
+
+    case "AI Mayank":
+      navigate("/ai-mayank");
+      break;
+
+    case "Physics Lab":
+      navigate("/physics-lab");
+      break;
+  }
+};
+    
   if (!selectedPlanet)
     return null;
 
@@ -38,6 +65,7 @@ export default function PlanetInfo({
 </p>
 
       <button
+      onClick={openPlanet}
         style={{
   marginTop: "15px",
   padding: "12px 18px",
