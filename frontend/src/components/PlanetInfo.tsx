@@ -1,3 +1,6 @@
+import { planetContent } from "../data/planetContent";
+
+
 type Props = {
   selectedPlanet: string | null;
 };
@@ -25,9 +28,12 @@ export default function PlanetInfo({
       <h2>{selectedPlanet}</h2>
 
       <p>
-        Welcome to the{" "}
-        {selectedPlanet} Planet.
-      </p>
+  {
+    planetContent[
+      selectedPlanet as keyof typeof planetContent
+    ]?.description
+  }
+</p>
 
       <button
         style={{
@@ -38,6 +44,16 @@ export default function PlanetInfo({
       >
         Open Planet
       </button>
+      <button
+  style={{
+    marginTop: "10px",
+    marginLeft: "10px",
+    padding: "10px",
+    cursor: "pointer",
+  }}
+>
+  Close
+</button>
     </div>
   );
 }
