@@ -1,27 +1,11 @@
-import { Link } from "react-router-dom";
+import PlanetPageLayout
+from "../components/PlanetPageLayout";
 
 export default function Experience() {
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "black",
-        color: "white",
-        padding: "40px",
-      }}
+    <PlanetPageLayout
+      title="Experience Planet"
     >
-      <Link
-  to="/"
-  style={{
-    color: "cyan",
-    textDecoration: "none",
-  }}
->
-  ← Return To Universe
-</Link>
-
-      <h1>Experience Planet</h1>
-
       <p>
         Bank of America Continuum India
       </p>
@@ -29,6 +13,6 @@ export default function Experience() {
       <p>
         Software Engineer
       </p>
-    </div>
+    </PlanetPageLayout>
   );
 }

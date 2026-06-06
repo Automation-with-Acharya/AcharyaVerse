@@ -1,31 +1,15 @@
-import { Link } from "react-router-dom";
+import PlanetPageLayout
+from "../components/PlanetPageLayout";
 
 export default function PhysicsLab() {
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "black",
-        color: "white",
-        padding: "40px",
-      }}
+    <PlanetPageLayout
+      title="Physics Lab"
     >
-<Link
-  to="/"
-  style={{
-    color: "cyan",
-    textDecoration: "none",
-  }}
->
-  ← Return To Universe
-</Link>
-
-      <h1>Physics Lab</h1>
-
       <p>
         Gravity simulations, orbital mechanics,
         black holes and physics experiments.
       </p>
-    </div>
+</PlanetPageLayout>
   );
 }
