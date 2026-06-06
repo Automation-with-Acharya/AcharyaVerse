@@ -17,7 +17,9 @@ export default function PlanetInfo({
         position: "absolute",
         top: 20,
         right: 20,
-        width: "320px",
+        width: "400px",
+        boxShadow:
+  "0 0 20px rgba(255,255,255,0.15)",
         background:
           "rgba(0,0,0,0.8)",
         color: "white",
@@ -37,10 +39,14 @@ export default function PlanetInfo({
 
       <button
         style={{
-          marginTop: "10px",
-          padding: "10px",
-          cursor: "pointer",
-        }}
+  marginTop: "15px",
+  padding: "12px 18px",
+  background: "#2563eb",
+  color: "white",
+  border: "none",
+  borderRadius: "8px",
+  cursor: "pointer",
+}}
       >
         Open Planet
       </button>
