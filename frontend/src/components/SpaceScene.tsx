@@ -3,6 +3,7 @@ import { Stars } from "@react-three/drei";
 import { useRef } from "react";
 import * as THREE from "three";
 import BlackHole from "./BlackHole";
+import Planet from "./Planet";
 
 function MovingCamera() {
   const groupRef = useRef<THREE.Group>(null);
@@ -38,6 +39,10 @@ export default function SpaceScene() {
       <ambientLight intensity={0.5} />
       <MovingCamera />
       <BlackHole />
+      <Planet position={[-4, 2, 0]} color="blue" />
+    <Planet position={[4, 2, 0]} color="green" />
+    <Planet position={[-4, -2, 0]} color="orange" />
+    <Planet position={[4, -2, 0]} color="purple" />
     </Canvas>
   );
 }
