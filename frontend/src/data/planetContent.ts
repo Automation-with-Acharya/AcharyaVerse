@@ -22,4 +22,9 @@ export const planetContent = {
     description:
       "Interactive simulations of gravity, orbits, black holes and physics experiments.",
   },
+
+  Resume: {
+    description:
+      "Explore Mayank Acharya's professional profile, skills and achievements.",
+  },
 };

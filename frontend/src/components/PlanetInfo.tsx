@@ -29,6 +29,10 @@ export default function PlanetInfo({ selectedPlanet }: Props) {
       case "Physics Lab":
         navigate("/physics-lab");
         break;
+
+      case "Resume":
+        navigate("/resume");
+        break;
     }
   };
 
