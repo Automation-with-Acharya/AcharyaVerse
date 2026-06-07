@@ -1,14 +1,10 @@
-import PlanetPageLayout
-from "../components/PlanetPageLayout";
+import PlanetPageLayout from "../components/PlanetPageLayout";
 
-import AiChat
-from "../components/AiChat";
+import AiChat from "../components/AiChat";
 
 export default function AiMayank() {
   return (
-    <PlanetPageLayout
-      title="AI Mayank"
-    >
+    <PlanetPageLayout title="AI Mayank">
       <AiChat />
     </PlanetPageLayout>
   );

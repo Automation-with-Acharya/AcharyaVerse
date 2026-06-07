@@ -1,11 +1,8 @@
-import PlanetPageLayout
-from "../components/PlanetPageLayout";
+import PlanetPageLayout from "../components/PlanetPageLayout";
 
 export default function Projects() {
   return (
-    <PlanetPageLayout
-      title="Projects Planet"
-    >
+    <PlanetPageLayout title="Projects Planet">
       <ul>
         <li>Power BI Dashboards</li>
         <li>React Applications</li>

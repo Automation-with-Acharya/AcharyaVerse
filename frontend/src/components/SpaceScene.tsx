@@ -9,9 +9,7 @@ import { planets } from "../data/planets";
 type SpaceSceneProps = {
   selectedPlanet: string | null;
 
-  setSelectedPlanet: (
-    planet: string | null
-  ) => void;
+  setSelectedPlanet: (planet: string | null) => void;
 };
 
 function MovingCamera() {
@@ -20,8 +18,7 @@ function MovingCamera() {
   useFrame(({ clock }) => {
     if (!groupRef.current) return;
 
-    groupRef.current.rotation.y =
-      Math.sin(clock.getElapsedTime() * 0.05) * 0.1;
+    groupRef.current.rotation.y = Math.sin(clock.getElapsedTime() * 0.05) * 0.1;
 
     groupRef.current.rotation.x =
       Math.cos(clock.getElapsedTime() * 0.03) * 0.05;
@@ -45,26 +42,22 @@ function MovingCamera() {
 export default function SpaceScene({
   selectedPlanet,
   setSelectedPlanet,
-}: SpaceSceneProps)  {
-    
+}: SpaceSceneProps) {
   return (
-    
     <Canvas camera={{ position: [0, 0, 5] }}>
       <ambientLight intensity={0.5} />
       <MovingCamera />
       <BlackHole />
-      {
-  planets.map((planet) => (
-    <Planet
-  key={planet.name}
-  name={planet.name}
-  color={planet.color}
-  position={planet.position}
-  selectedPlanet={selectedPlanet}
-  setSelectedPlanet={setSelectedPlanet}
-/>
-  ))
-}
+      {planets.map((planet) => (
+        <Planet
+          key={planet.name}
+          name={planet.name}
+          color={planet.color}
+          position={planet.position}
+          selectedPlanet={selectedPlanet}
+          setSelectedPlanet={setSelectedPlanet}
+        />
+      ))}
     </Canvas>
   );
 }

@@ -6,10 +6,7 @@ type Props = {
   children: ReactNode;
 };
 
-export default function PlanetPageLayout({
-  title,
-  children,
-}: Props) {
+export default function PlanetPageLayout({ title, children }: Props) {
   return (
     <div
       style={{
@@ -31,9 +28,9 @@ export default function PlanetPageLayout({
 
       <h1
         style={{
-            fontSize: "3rem",
-    letterSpacing: "3px",
-    color: "#60a5fa",
+          fontSize: "3rem",
+          letterSpacing: "3px",
+          color: "#60a5fa",
           marginTop: "20px",
           marginBottom: "30px",
         }}

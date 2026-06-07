@@ -8,13 +8,12 @@ type Message = {
 export default function AiChat() {
   const [input, setInput] = useState("");
 
-  const [messages, setMessages] =
-    useState<Message[]>([
-      {
-        sender: "ai",
-        text: "Hello, I am AI Mayank. Ask me anything.",
-      },
-    ]);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      sender: "ai",
+      text: "Hello, I am AI Mayank. Ask me anything.",
+    },
+  ]);
 
   const sendMessage = () => {
     if (!input.trim()) return;
@@ -24,31 +23,22 @@ export default function AiChat() {
       text: input,
     };
 
-    let aiResponse =
-      "That's an interesting question.";
+    let aiResponse = "That's an interesting question.";
 
-    const lower =
-      input.toLowerCase();
+    const lower = input.toLowerCase();
 
-    if (
-      lower.includes("experience")
-    ) {
+    if (lower.includes("experience")) {
       aiResponse =
         "Mayank has worked at Bank of America Continuum India for over six years.";
     }
 
-    if (
-      lower.includes("skills")
-    ) {
+    if (lower.includes("skills")) {
       aiResponse =
         "Skills include .NET, C#, Python, React, Power BI and UiPath.";
     }
 
-    if (
-      lower.includes("physics")
-    ) {
-      aiResponse =
-        "Physics is one of Mayank's biggest passions.";
+    if (lower.includes("physics")) {
+      aiResponse = "Physics is one of Mayank's biggest passions.";
     }
 
     setMessages((prev) => [
@@ -67,95 +57,80 @@ export default function AiChat() {
     <div>
       <div
         style={{
-  height: "500px",
-  overflowY: "auto",
-  border: "1px solid #333",
-  padding: "20px",
-  marginBottom: "20px",
-  borderRadius: "12px",
-  background: "#0f172a",
-}}
-      >
-        {messages.map(
-  (message, index) => (
-    <div
-      key={index}
-      style={{
-        display: "flex",
-        justifyContent:
-          message.sender === "user"
-            ? "flex-end"
-            : "flex-start",
-        marginBottom: "12px",
-      }}
-    >
-      <div
-        style={{
-          background:
-            message.sender === "user"
-              ? "#2563eb"
-              : "#1e293b",
-
-          padding: "12px",
-
+          height: "500px",
+          overflowY: "auto",
+          border: "1px solid #333",
+          padding: "20px",
+          marginBottom: "20px",
           borderRadius: "12px",
-
-          maxWidth: "70%",
-
-          color: "white",
+          background: "#0f172a",
         }}
       >
-        <strong>
-          {message.sender === "user"
-            ? "You"
-            : "AI Mayank"}
-        </strong>
+        {messages.map((message, index) => (
+          <div
+            key={index}
+            style={{
+              display: "flex",
+              justifyContent:
+                message.sender === "user" ? "flex-end" : "flex-start",
+              marginBottom: "12px",
+            }}
+          >
+            <div
+              style={{
+                background: message.sender === "user" ? "#2563eb" : "#1e293b",
 
-        <div
-          style={{
-            marginTop: "5px",
-          }}
-        >
-          {message.text}
-        </div>
-      </div>
-    </div>
-  )
-)}
+                padding: "12px",
+
+                borderRadius: "12px",
+
+                maxWidth: "70%",
+
+                color: "white",
+              }}
+            >
+              <strong>{message.sender === "user" ? "You" : "AI Mayank"}</strong>
+
+              <div
+                style={{
+                  marginTop: "5px",
+                }}
+              >
+                {message.text}
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       <input
-      autoFocus
+        autoFocus
         value={input}
-        onChange={(e) =>
-          setInput(
-            e.target.value
-          )
-        }
+        onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => {
-  if (e.key === "Enter") {
-    sendMessage();
-  }
-}}
+          if (e.key === "Enter") {
+            sendMessage();
+          }
+        }}
         style={{
-  width: "80%",
-  padding: "12px",
-  borderRadius: "8px",
-  border: "1px solid #444",
-}}
+          width: "80%",
+          padding: "12px",
+          borderRadius: "8px",
+          border: "1px solid #444",
+        }}
       />
 
       <button
         onClick={sendMessage}
         style={{
-  marginLeft: "10px",
-  padding: "12px 18px",
-  background: "#2563eb",
-  color: "white",
-  border: "none",
-  borderRadius: "8px",
-  cursor: "pointer",
-}}
+          marginLeft: "10px",
+          padding: "12px 18px",
+          background: "#2563eb",
+          color: "white",
+          border: "none",
+          borderRadius: "8px",
+          cursor: "pointer",
+        }}
       >
         Send
       </button>

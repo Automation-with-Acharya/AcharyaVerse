@@ -22,8 +22,8 @@ export const planets: PlanetData[] = [
     position: [4, -2, 0],
   },
   {
-  name: "Physics Lab",
-  color: "red",
-  position: [0, 4, 0],
-}
+    name: "Physics Lab",
+    color: "red",
+    position: [0, 4, 0],
+  },
 ];

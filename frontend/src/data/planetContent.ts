@@ -15,12 +15,11 @@ export const planetContent = {
   },
 
   "AI Mayank": {
-    description:
-      "Talk with an AI-powered digital twin of Mayank Acharya.",
+    description: "Talk with an AI-powered digital twin of Mayank Acharya.",
   },
 
   "Physics Lab": {
-  description:
-    "Interactive simulations of gravity, orbits, black holes and physics experiments.",
-},
+    description:
+      "Interactive simulations of gravity, orbits, black holes and physics experiments.",
+  },
 };
