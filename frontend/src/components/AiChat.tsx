@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { knowledge } from "../data/knowledge";
 
 type Message = {
   sender: "user" | "ai";
@@ -28,17 +29,23 @@ export default function AiChat() {
     const lower = input.toLowerCase();
 
     if (lower.includes("experience")) {
-      aiResponse =
-        "Mayank has worked at Bank of America Continuum India for over six years.";
+      aiResponse = knowledge.experience;
     }
 
     if (lower.includes("skills")) {
-      aiResponse =
-        "Skills include .NET, C#, Python, React, Power BI and UiPath.";
+      aiResponse = knowledge.skills;
     }
 
     if (lower.includes("physics")) {
-      aiResponse = "Physics is one of Mayank's biggest passions.";
+      aiResponse = knowledge.physics;
+    }
+
+    if (lower.includes("project")) {
+      aiResponse = knowledge.projects;
+    }
+
+    if (lower.includes("future")) {
+      aiResponse = knowledge.future;
     }
 
     setMessages((prev) => [
