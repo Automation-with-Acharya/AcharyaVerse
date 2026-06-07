@@ -33,6 +33,20 @@ export default function Contact() {
         <h3>Email</h3>
         <p>mayank.acharya.official@gmail.com</p>
       </div>
+
+      <button
+        style={{
+          marginTop: "20px",
+          padding: "12px 20px",
+          borderRadius: "8px",
+          border: "none",
+          background: "#2563eb",
+          color: "white",
+          cursor: "pointer",
+        }}
+      >
+        Download Resume
+      </button>
     </PlanetPageLayout>
   );
 }

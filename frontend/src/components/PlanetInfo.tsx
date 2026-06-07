@@ -33,6 +33,10 @@ export default function PlanetInfo({ selectedPlanet }: Props) {
       case "Resume":
         navigate("/resume");
         break;
+
+      case "Contact":
+        navigate("/contact");
+        break;
     }
   };
 
