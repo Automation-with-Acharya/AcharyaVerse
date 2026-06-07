@@ -1,4 +1,5 @@
 import PlanetPageLayout from "../components/PlanetPageLayout";
+import ExpandableCard from "../components/ExpandableCard";
 
 export default function Experience() {
   return (
@@ -13,125 +14,175 @@ export default function Experience() {
           paddingLeft: "30px",
         }}
       >
-        <div
-          style={{
-            marginBottom: "30px",
-            padding: "20px",
-            background: "#111827",
-            borderRadius: "12px",
-            border: "1px solid #2563eb",
-            boxShadow: "0 0 10px rgba(37,99,235,0.5)",
-          }}
-        >
-          <h3>2020</h3>
-          <p>Joined Bank of America.</p>
-        </div>
+        <ExpandableCard
+          title="2020"
+          subtitle="Joined Bank of America"
+          details={
+            <>
+              <p>Started my professional journey at Bank of America.</p>
 
-        <div
-          style={{
-            marginBottom: "30px",
-            padding: "20px",
-            background: "#111827",
-            borderRadius: "12px",
-            border: "1px solid #2563eb",
-            boxShadow: "0 0 10px rgba(37,99,235,0.5)",
-          }}
-        >
-          <h3>2021</h3>
-          <p>Worked on multiple .NET and C# projects.</p>
-        </div>
+              <br />
 
-        <div
-          style={{
-            marginBottom: "30px",
-            padding: "20px",
-            background: "#111827",
-            borderRadius: "12px",
-            border: "1px solid #2563eb",
-            boxShadow: "0 0 10px rgba(37,99,235,0.5)",
-          }}
-        >
-          <h3>2022</h3>
-          <p>Worked on React, Flask and Python applications.</p>
-        </div>
+              <p>Focus Areas:</p>
 
-        <div
-          style={{
-            marginBottom: "30px",
-            padding: "20px",
-            background: "#111827",
-            borderRadius: "12px",
-            border: "1px solid #2563eb",
-            boxShadow: "0 0 10px rgba(37,99,235,0.5)",
-          }}
-        >
-          <h3>2023</h3>
-          <p>Developed Power BI dashboards and reporting solutions.</p>
-        </div>
+              <ul>
+                <li>Software Development</li>
+                <li>Enterprise Systems</li>
+                <li>Banking Domain</li>
+              </ul>
+            </>
+          }
+        />
 
-        <div
-          style={{
-            marginBottom: "30px",
-            padding: "20px",
-            background: "#111827",
-            borderRadius: "12px",
-            border: "1px solid #2563eb",
-            boxShadow: "0 0 10px rgba(37,99,235,0.5)",
-          }}
-        >
-          <h3>2024</h3>
-          <p>Built UiPath automation solutions.</p>
-        </div>
+        <ExpandableCard
+          title="2021"
+          subtitle="Worked on multiple .NET and C# projects"
+          details={
+            <>
+              <p>Technologies:</p>
 
-        <div
-          style={{
-            marginBottom: "30px",
-            padding: "20px",
-            background: "#111827",
-            borderRadius: "12px",
-            border: "1px solid #2563eb",
-            boxShadow: "0 0 10px rgba(37,99,235,0.5)",
-          }}
-        >
-          <h3>2025</h3>
-          <p>
-            Expanded into DevOps, Release Management and Full Stack Development.
-          </p>
-        </div>
+              <ul>
+                <li>.NET Framework</li>
+                <li>C#</li>
+                <li>Windows Applications</li>
+                <li>Enterprise Development</li>
+              </ul>
 
-        <div
-          style={{
-            marginBottom: "30px",
-            padding: "20px",
-            background: "#111827",
-            borderRadius: "12px",
-            border: "1px solid #2563eb",
-            boxShadow: "0 0 10px rgba(37,99,235,0.5)",
-          }}
-        >
-          <h3>2026</h3>
-          <p>
-            Leading a team of 6 engineers across DevOps, Development, RPA and
-            Power BI initiatives.
-          </p>
-        </div>
+              <br />
 
-        <div
-          style={{
-            marginBottom: "30px",
-            padding: "20px",
-            background: "#1e293b",
-            borderRadius: "12px",
-            border: "1px solid #f59e0b",
-            boxShadow: "0 0 12px rgba(245,158,11,0.5)",
-          }}
-        >
-          <h3>Future</h3>
-          <p>
-            Exploring Artificial Intelligence, Physics, Scientific Computing and
-            the evolution of AcharyaVerse.
-          </p>
-        </div>
+              <p>Built and maintained enterprise software solutions.</p>
+            </>
+          }
+        />
+
+        <ExpandableCard
+          title="2022"
+          subtitle="Worked on React, Flask and Python applications"
+          details={
+            <>
+              <p>Technologies:</p>
+
+              <ul>
+                <li>React</li>
+                <li>Flask</li>
+                <li>Python</li>
+                <li>REST APIs</li>
+              </ul>
+
+              <br />
+
+              <p>Expanded into modern web development and backend APIs.</p>
+            </>
+          }
+        />
+
+        <ExpandableCard
+          title="2023"
+          subtitle="Developed Power BI dashboards and reporting solutions"
+          details={
+            <>
+              <p>Technologies:</p>
+
+              <ul>
+                <li>Power BI</li>
+                <li>DAX</li>
+                <li>Data Modeling</li>
+                <li>Reporting</li>
+              </ul>
+
+              <br />
+
+              <p>Created dashboards and business intelligence solutions.</p>
+            </>
+          }
+        />
+
+        <ExpandableCard
+          title="2024"
+          subtitle="Built UiPath automation solutions"
+          details={
+            <>
+              <p>Technologies:</p>
+
+              <ul>
+                <li>UiPath</li>
+                <li>OCR</li>
+                <li>Automation</li>
+                <li>PDF Processing</li>
+              </ul>
+
+              <br />
+
+              <p>Developed enterprise automation solutions and bots.</p>
+            </>
+          }
+        />
+
+        <ExpandableCard
+          title="2025"
+          subtitle="Expanded into DevOps, Release Management and Full Stack Development"
+          details={
+            <>
+              <p>Focus Areas:</p>
+
+              <ul>
+                <li>DevOps</li>
+                <li>Release Management</li>
+                <li>React</li>
+                <li>Python</li>
+              </ul>
+
+              <br />
+
+              <p>
+                Took ownership of broader development and deployment
+                responsibilities.
+              </p>
+            </>
+          }
+        />
+
+        <ExpandableCard
+          title="2026"
+          subtitle="Leading a team of 6 engineers"
+          details={
+            <>
+              <p>Leadership Areas:</p>
+
+              <ul>
+                <li>DevOps Projects</li>
+                <li>Development Projects</li>
+                <li>Power BI Initiatives</li>
+                <li>RPA Solutions</li>
+              </ul>
+
+              <br />
+
+              <p>Managing delivery across multiple technology streams.</p>
+            </>
+          }
+        />
+
+        <ExpandableCard
+          title="Future"
+          subtitle="AI, Physics and AcharyaVerse"
+          details={
+            <>
+              <p>Vision:</p>
+
+              <ul>
+                <li>Artificial Intelligence</li>
+                <li>Physics Simulations</li>
+                <li>Scientific Computing</li>
+                <li>AcharyaVerse Evolution</li>
+              </ul>
+
+              <br />
+
+              <p>Combining technology, science and creativity.</p>
+            </>
+          }
+        />
       </div>
     </PlanetPageLayout>
   );
