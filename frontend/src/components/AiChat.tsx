@@ -24,65 +24,21 @@ export default function AiChat() {
     if (!chatContainerRef.current) return;
 
     chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-  }, [messages]);
+  }, [messages, isTyping]);
 
-  const askQuestion = (question: string) => {
-    setInput(question);
+  const sendMessage = (customQuestion?: string) => {
+    const question = customQuestion ?? input;
 
-    setTimeout(() => {
-      const userMessage: Message = {
-        sender: "user",
-        text: question,
-      };
-
-      let aiResponse = "That's an interesting question.";
-
-      const lower = question.toLowerCase();
-
-      if (lower.includes("experience")) {
-        aiResponse = knowledge.experience;
-      }
-
-      if (lower.includes("skills")) {
-        aiResponse = knowledge.skills;
-      }
-
-      if (lower.includes("physics")) {
-        aiResponse = knowledge.physics;
-      }
-
-      if (lower.includes("project")) {
-        aiResponse = knowledge.projects;
-      }
-
-      if (lower.includes("future")) {
-        aiResponse = knowledge.future;
-      }
-
-      setMessages((prev) => [
-        ...prev,
-        userMessage,
-        {
-          sender: "ai",
-          text: aiResponse,
-        },
-      ]);
-
-      setInput("");
-    }, 100);
-  };
-
-  const sendMessage = () => {
-    if (!input.trim()) return;
+    if (!question.trim()) return;
 
     const userMessage: Message = {
       sender: "user",
-      text: input,
+      text: question,
     };
 
     let aiResponse = "That's an interesting question.";
 
-    const lower = input.toLowerCase();
+    const lower = question.toLowerCase();
 
     if (lower.includes("experience")) {
       aiResponse = knowledge.experience;
@@ -121,9 +77,34 @@ export default function AiChat() {
 
       setIsTyping(false);
     }, 1000);
-
-    setInput("");
   };
+
+  const askQuestion = (question: string) => {
+    sendMessage(question);
+  };
+
+  const suggestionQuestions = [
+    {
+      label: "Experience",
+      question: "Tell me about your experience",
+    },
+    {
+      label: "Skills",
+      question: "What are your skills?",
+    },
+    {
+      label: "Projects",
+      question: "Tell me about your projects",
+    },
+    {
+      label: "Future",
+      question: "What are your future goals?",
+    },
+    {
+      label: "Physics",
+      question: "Why do you like physics?",
+    },
+  ];
 
   return (
     <div>
@@ -132,87 +113,26 @@ export default function AiChat() {
           marginBottom: "20px",
         }}
       >
-        <p>Try Asking:</p>
+        <h3>Try Asking:</h3>
 
-        <button
-          onClick={() => askQuestion("Tell me about your experience")}
-          style={{
-            padding: "8px 14px",
-            marginRight: "8px",
-            marginBottom: "8px",
-            borderRadius: "20px",
-            border: "1px solid #2563eb",
-            background: "#111827",
-            color: "white",
-            cursor: "pointer",
-          }}
-        >
-          Experience
-        </button>
-
-        <button
-          onClick={() => askQuestion("What are your skills?")}
-          style={{
-            padding: "8px 14px",
-            marginRight: "8px",
-            marginBottom: "8px",
-            borderRadius: "20px",
-            border: "1px solid #2563eb",
-            background: "#111827",
-            color: "white",
-            cursor: "pointer",
-          }}
-        >
-          Skills
-        </button>
-
-        <button
-          onClick={() => askQuestion("Tell me about your projects")}
-          style={{
-            padding: "8px 14px",
-            marginRight: "8px",
-            marginBottom: "8px",
-            borderRadius: "20px",
-            border: "1px solid #2563eb",
-            background: "#111827",
-            color: "white",
-            cursor: "pointer",
-          }}
-        >
-          Projects
-        </button>
-
-        <button
-          onClick={() => askQuestion("What are your future goals?")}
-          style={{
-            padding: "8px 14px",
-            marginRight: "8px",
-            marginBottom: "8px",
-            borderRadius: "20px",
-            border: "1px solid #2563eb",
-            background: "#111827",
-            color: "white",
-            cursor: "pointer",
-          }}
-        >
-          Future
-        </button>
-
-        <button
-          onClick={() => askQuestion("Why do you like physics?")}
-          style={{
-            padding: "8px 14px",
-            marginRight: "8px",
-            marginBottom: "8px",
-            borderRadius: "20px",
-            border: "1px solid #2563eb",
-            background: "#111827",
-            color: "white",
-            cursor: "pointer",
-          }}
-        >
-          Physics
-        </button>
+        {suggestionQuestions.map((item) => (
+          <button
+            key={item.label}
+            onClick={() => askQuestion(item.question)}
+            style={{
+              padding: "8px 14px",
+              marginRight: "8px",
+              marginBottom: "8px",
+              borderRadius: "20px",
+              border: "1px solid #2563eb",
+              background: "#111827",
+              color: "white",
+              cursor: "pointer",
+            }}
+          >
+            {item.label}
+          </button>
+        ))}
       </div>
 
       <div
@@ -240,13 +160,9 @@ export default function AiChat() {
             <div
               style={{
                 background: message.sender === "user" ? "#2563eb" : "#1e293b",
-
                 padding: "12px",
-
                 borderRadius: "12px",
-
                 maxWidth: "70%",
-
                 color: "white",
               }}
             >
@@ -262,16 +178,37 @@ export default function AiChat() {
             </div>
           </div>
         ))}
+
         {isTyping && (
           <div
             style={{
-              marginBottom: "15px",
+              display: "flex",
+              justifyContent: "flex-start",
+              marginBottom: "12px",
             }}
           >
-            <strong>AI Mayank</strong>: Thinking...
+            <div
+              style={{
+                background: "#1e293b",
+                padding: "12px",
+                borderRadius: "12px",
+                color: "white",
+              }}
+            >
+              <strong>AI Mayank</strong>
+
+              <div
+                style={{
+                  marginTop: "5px",
+                }}
+              >
+                Thinking...
+              </div>
+            </div>
           </div>
         )}
       </div>
+
       <input
         autoFocus
         value={input}
@@ -288,8 +225,9 @@ export default function AiChat() {
           border: "1px solid #444",
         }}
       />
+
       <button
-        onClick={sendMessage}
+        onClick={() => sendMessage()}
         style={{
           marginLeft: "10px",
           padding: "12px 18px",
