@@ -1,6 +1,6 @@
 import { Canvas } from "@react-three/fiber";
 import { useFrame } from "@react-three/fiber";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { Line } from "@react-three/drei";
 
@@ -13,6 +13,85 @@ type Props = {
   simulationKey: number;
   orbitalMode: boolean;
 };
+
+function createInitialPositions(distance: number) {
+  return {
+    bodyA: new THREE.Vector3(-distance / 2, 0, 0),
+    bodyB: new THREE.Vector3(distance / 2, 0, 0),
+  };
+}
+
+function OrbitRing({
+  radius,
+  color,
+}: {
+  radius: number;
+  color: string;
+}) {
+  const points = useMemo<[number, number, number][]>(() => {
+    const ringPoints: [number, number, number][] = [];
+
+    for (let i = 0; i <= 128; i++) {
+      const angle = (i / 128) * Math.PI * 2;
+
+      ringPoints.push([Math.cos(angle) * radius, 0, Math.sin(angle) * radius]);
+    }
+
+    return ringPoints;
+  }, [radius]);
+
+  if (radius < 0.05) return null;
+
+  return <Line points={points} color={color} lineWidth={1} />;
+}
+
+function ForceBeam({
+  leftRef,
+  rightRef,
+  lineWidth,
+}: {
+  leftRef: React.RefObject<THREE.Mesh | null>;
+  rightRef: React.RefObject<THREE.Mesh | null>;
+  lineWidth: number;
+}) {
+  const geometryRef = useRef<THREE.BufferGeometry>(null);
+
+  const positions = useMemo(() => new Float32Array(6), []);
+
+  useFrame(() => {
+    if (!leftRef.current || !rightRef.current || !geometryRef.current) return;
+
+    const positionAttribute = geometryRef.current.getAttribute(
+      "position",
+    ) as THREE.BufferAttribute;
+
+    positionAttribute.setXYZ(
+      0,
+      leftRef.current.position.x,
+      leftRef.current.position.y,
+      leftRef.current.position.z,
+    );
+
+    positionAttribute.setXYZ(
+      1,
+      rightRef.current.position.x,
+      rightRef.current.position.y,
+      rightRef.current.position.z,
+    );
+
+    positionAttribute.needsUpdate = true;
+  });
+
+  return (
+    <line>
+      <bufferGeometry ref={geometryRef}>
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+      </bufferGeometry>
+
+      <lineBasicMaterial color="yellow" linewidth={lineWidth} />
+    </line>
+  );
+}
 
 function Bodies({
   mass1,
@@ -30,31 +109,53 @@ function Bodies({
 
   const orbitAngle = useRef(0);
 
+  const totalMass = mass1 + mass2;
+
+  const radiusA = (distance * mass2) / totalMass;
+
+  const radiusB = (distance * mass1) / totalMass;
+
+  const barycentricOrbitSpeed = Math.sqrt((6.674 * totalMass) / distance ** 3);
+
   useEffect(() => {
     initialized.current = false;
 
+    orbitAngle.current = 0;
+
+    const initialPositions = createInitialPositions(distance);
+
     if (leftRef.current && rightRef.current) {
-      leftRef.current.position.x = -distance / 2;
+      leftRef.current.position.copy(initialPositions.bodyA);
 
-      rightRef.current.position.x = distance / 2;
+      rightRef.current.position.copy(initialPositions.bodyB);
     }
-  }, [simulationKey, distance]);
+  }, [simulationKey, distance, mass1, mass2, orbitalMode]);
 
-  useFrame(() => {
+  useFrame((_, delta) => {
     if (!leftRef.current || !rightRef.current) return;
 
     if (!simulationRunning) return;
 
     if (orbitalMode) {
-      orbitAngle.current += 0.01;
+      orbitAngle.current += delta * barycentricOrbitSpeed * 0.08;
 
-      const radius = distance / 2;
+      const angle = orbitAngle.current;
 
-      leftRef.current.position.set(0, 0, 0);
+      const bodyA = new THREE.Vector3(
+        Math.cos(angle + Math.PI) * radiusA,
+        0,
+        Math.sin(angle + Math.PI) * radiusA,
+      );
 
-      rightRef.current.position.x = Math.cos(orbitAngle.current) * radius;
+      const bodyB = new THREE.Vector3(
+        Math.cos(angle) * radiusB,
+        0,
+        Math.sin(angle) * radiusB,
+      );
 
-      rightRef.current.position.z = Math.sin(orbitAngle.current) * radius;
+      leftRef.current.position.copy(bodyA);
+
+      rightRef.current.position.copy(bodyB);
 
       return;
     }
@@ -84,24 +185,35 @@ function Bodies({
 
   return (
     <>
-      <mesh ref={leftRef}>
+      {orbitalMode && (
+        <>
+          <OrbitRing radius={radiusA} color="#60a5fa" />
+
+          <OrbitRing radius={radiusB} color="#f87171" />
+
+          <mesh>
+            <sphereGeometry args={[0.08, 16, 16]} />
+
+            <meshStandardMaterial color="white" emissive="white" />
+          </mesh>
+        </>
+      )}
+
+      <mesh ref={leftRef} position={[-distance / 2, 0, 0]}>
         <sphereGeometry args={[Math.max(mass1 / 200, 0.5), 32, 32]} />
 
         <meshStandardMaterial color="blue" />
       </mesh>
 
-      <mesh ref={rightRef}>
+      <mesh ref={rightRef} position={[distance / 2, 0, 0]}>
         <sphereGeometry args={[Math.max(mass2 / 200, 0.5), 32, 32]} />
 
         <meshStandardMaterial color="red" />
       </mesh>
 
-      <Line
-        points={[
-          [leftRef.current?.position.x ?? 0, 0, 0],
-          [rightRef.current?.position.x ?? 0, 0, 0],
-        ]}
-        color="yellow"
+      <ForceBeam
+        leftRef={leftRef}
+        rightRef={rightRef}
         lineWidth={Math.min((mass1 * mass2) / (distance * distance * 500), 10)}
       />
     </>

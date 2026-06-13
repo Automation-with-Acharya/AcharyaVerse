@@ -1,6 +1,6 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Line } from "@react-three/drei";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import * as THREE from "three";
 import { useThree } from "@react-three/fiber";
 
@@ -35,16 +35,6 @@ function Ball({
   const [trailPoints, setTrailPoints] = useState<[number, number, number][]>(
     [],
   );
-
-  useEffect(() => {
-    elapsedRef.current = 0;
-
-    setTrailPoints([]);
-
-    if (ref.current) {
-      ref.current.position.set(0, 0, 0);
-    }
-  }, [launchKey]);
 
   useFrame((_, delta) => {
     if (!ref.current) return;
@@ -187,6 +177,7 @@ function ProjectileScene({
       </mesh>
 
       <Ball
+        key={launchKey}
         angle={angle}
         velocity={velocity}
         launchKey={launchKey}

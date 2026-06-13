@@ -1,8 +1,8 @@
 import { Canvas, useFrame } from "@react-three/fiber";
+import type { ComponentRef } from "react";
 import { useRef, useState } from "react";
 import * as THREE from "three";
 import { Line, Text, OrbitControls } from "@react-three/drei";
-import { useThree } from "@react-three/fiber";
 
 function OrbitRing({ radius }: { radius: number }) {
   const points: [number, number, number][] = [];
@@ -87,7 +87,7 @@ export default function OrbitalSimulation() {
 
   const [paused, setPaused] = useState(false);
 
-  const controlsRef = useRef<any>(null);
+  const controlsRef = useRef<ComponentRef<typeof OrbitControls>>(null);
 
   return (
     <>
