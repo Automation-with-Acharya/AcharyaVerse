@@ -1,5 +1,6 @@
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useRef, useEffect } from "react";
+import { OrbitControls, Line } from "@react-three/drei";
+import { useRef, useEffect, useState } from "react";
 import * as THREE from "three";
 
 type ProjectileCanvasProps = {
@@ -13,8 +14,14 @@ function Ball({ angle, velocity, launchKey }: ProjectileCanvasProps) {
 
   const elapsedRef = useRef(0);
 
+  const [trailPoints, setTrailPoints] = useState<[number, number, number][]>(
+    [],
+  );
+
   useEffect(() => {
     elapsedRef.current = 0;
+
+    setTrailPoints([]);
 
     if (ref.current) {
       ref.current.position.set(0, 0, 0);
@@ -47,13 +54,21 @@ function Ball({ angle, velocity, launchKey }: ProjectileCanvasProps) {
     if (y < 0) return;
 
     ref.current.position.set(x, y, 0);
+
+    setTrailPoints((prev) => [...prev, [x, y, 0]]);
   });
 
   return (
-    <mesh ref={ref}>
-      <sphereGeometry args={[0.2, 32, 32]} />
-      <meshStandardMaterial color="orange" />
-    </mesh>
+    <>
+      <mesh ref={ref}>
+        <sphereGeometry args={[0.2, 32, 32]} />
+        <meshStandardMaterial color="orange" />
+      </mesh>
+
+      {trailPoints.length > 1 && (
+        <Line points={trailPoints} color="yellow" lineWidth={2} />
+      )}
+    </>
   );
 }
 
@@ -65,18 +80,21 @@ export default function ProjectileCanvas({
   return (
     <Canvas
       style={{
-        height: "400px",
+        height: "500px",
         marginTop: "30px",
       }}
       camera={{
-        position: [5, 5, 10],
+        position: [10, 8, 15],
+        fov: 50,
       }}
     >
       <ambientLight intensity={2} />
 
+      <OrbitControls enableDamping />
+
       <Ball angle={angle} velocity={velocity} launchKey={launchKey} />
 
-      <gridHelper args={[20, 20]} />
+      <gridHelper args={[50, 50]} />
     </Canvas>
   );
 }
