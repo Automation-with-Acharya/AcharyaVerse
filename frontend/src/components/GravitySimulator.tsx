@@ -2,6 +2,8 @@ import { useState } from "react";
 import GravityCanvas from "./GravityCanvas";
 
 export default function GravitySimulator() {
+  const [scenarioName, setScenarioName] = useState("Custom");
+
   const [mass1, setMass1] = useState(100);
 
   const [mass2, setMass2] = useState(100);
@@ -39,6 +41,44 @@ export default function GravitySimulator() {
     totalMass
   ).toFixed(2);
 
+  const applyScenario = ({
+    name,
+    nextMass1,
+    nextMass2,
+    nextDistance,
+    nextOrbitalMode,
+    nextShowCurvature,
+    nextCurvatureScale,
+  }: {
+    name: string;
+    nextMass1: number;
+    nextMass2: number;
+    nextDistance: number;
+    nextOrbitalMode: boolean;
+    nextShowCurvature: boolean;
+    nextCurvatureScale: number;
+  }) => {
+    setScenarioName(name);
+
+    setMass1(nextMass1);
+
+    setMass2(nextMass2);
+
+    setDistance(nextDistance);
+
+    setOrbitalMode(nextOrbitalMode);
+
+    setShowCurvature(nextShowCurvature);
+
+    setCurvatureScale(nextCurvatureScale);
+
+    setSimulationRunning(false);
+
+    setSimulationStatus("Ready");
+
+    setSimulationKey(Date.now());
+  };
+
   return (
     <div>
       <h2>Gravity Simulator</h2>
@@ -48,6 +88,92 @@ export default function GravitySimulator() {
           maxWidth: "500px",
         }}
       >
+        <div
+          style={{
+            marginBottom: "24px",
+          }}
+        >
+          <h3>Scenarios</h3>
+
+          <button
+            onClick={() =>
+              applyScenario({
+                name: "Binary Stars",
+                nextMass1: 750,
+                nextMass2: 600,
+                nextDistance: 18,
+                nextOrbitalMode: true,
+                nextShowCurvature: true,
+                nextCurvatureScale: 4,
+              })
+            }
+            style={{
+              padding: "8px 14px",
+              marginRight: "8px",
+              marginBottom: "8px",
+              background: "#2563eb",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+            }}
+          >
+            Binary Stars
+          </button>
+
+          <button
+            onClick={() =>
+              applyScenario({
+                name: "Star and Planet",
+                nextMass1: 1000,
+                nextMass2: 80,
+                nextDistance: 22,
+                nextOrbitalMode: true,
+                nextShowCurvature: true,
+                nextCurvatureScale: 5,
+              })
+            }
+            style={{
+              padding: "8px 14px",
+              marginRight: "8px",
+              marginBottom: "8px",
+              background: "#374151",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+            }}
+          >
+            Star and Planet
+          </button>
+
+          <button
+            onClick={() =>
+              applyScenario({
+                name: "Equal Mass Pair",
+                nextMass1: 500,
+                nextMass2: 500,
+                nextDistance: 16,
+                nextOrbitalMode: true,
+                nextShowCurvature: false,
+                nextCurvatureScale: 3,
+              })
+            }
+            style={{
+              padding: "8px 14px",
+              marginRight: "8px",
+              marginBottom: "8px",
+              background: "#0f766e",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+            }}
+          >
+            Equal Mass Pair
+          </button>
+        </div>
+
         <div>
           Mass A:
           {mass1}
@@ -58,7 +184,11 @@ export default function GravitySimulator() {
           min="1"
           max="1000"
           value={mass1}
-          onChange={(e) => setMass1(Number(e.target.value))}
+          onChange={(e) => {
+            setScenarioName("Custom");
+
+            setMass1(Number(e.target.value));
+          }}
           style={{
             width: "100%",
           }}
@@ -77,7 +207,11 @@ export default function GravitySimulator() {
           min="1"
           max="1000"
           value={mass2}
-          onChange={(e) => setMass2(Number(e.target.value))}
+          onChange={(e) => {
+            setScenarioName("Custom");
+
+            setMass2(Number(e.target.value));
+          }}
           style={{
             width: "100%",
           }}
@@ -96,7 +230,11 @@ export default function GravitySimulator() {
           min="1"
           max="50"
           value={distance}
-          onChange={(e) => setDistance(Number(e.target.value))}
+          onChange={(e) => {
+            setScenarioName("Custom");
+
+            setDistance(Number(e.target.value));
+          }}
           style={{
             width: "100%",
           }}
@@ -161,7 +299,11 @@ export default function GravitySimulator() {
             <input
               type="checkbox"
               checked={orbitalMode}
-              onChange={(e) => setOrbitalMode(e.target.checked)}
+              onChange={(e) => {
+                setScenarioName("Custom");
+
+                setOrbitalMode(e.target.checked);
+              }}
             />{" "}
             Orbital Mode
           </label>
@@ -176,7 +318,11 @@ export default function GravitySimulator() {
             <input
               type="checkbox"
               checked={showCurvature}
-              onChange={(e) => setShowCurvature(e.target.checked)}
+              onChange={(e) => {
+                setScenarioName("Custom");
+
+                setShowCurvature(e.target.checked);
+              }}
             />{" "}
             Spacetime Curvature
           </label>
@@ -196,7 +342,11 @@ export default function GravitySimulator() {
               max="8"
               step="0.5"
               value={curvatureScale}
-              onChange={(e) => setCurvatureScale(Number(e.target.value))}
+              onChange={(e) => {
+                setScenarioName("Custom");
+
+                setCurvatureScale(Number(e.target.value));
+              }}
               style={{
                 width: "100%",
               }}
@@ -216,6 +366,8 @@ export default function GravitySimulator() {
           }}
         >
           <h3>Gravity Dashboard</h3>
+
+          <p>Scenario: {scenarioName}</p>
 
           <p>
             Force:
