@@ -30,6 +30,14 @@ export default function ProjectileMotion() {
     (2 * g)
   ).toFixed(2);
 
+  const radians = (angle * Math.PI) / 180;
+
+  const horizontalVelocity = (velocity * Math.cos(radians)).toFixed(2);
+
+  const verticalVelocity = (velocity * Math.sin(radians)).toFixed(2);
+
+  const flightTime = ((2 * velocity * Math.sin(radians)) / g).toFixed(2);
+
   return (
     <div>
       <h2>Projectile Motion</h2>
@@ -146,14 +154,27 @@ export default function ProjectileMotion() {
         <br />
         <br />
 
-        <h3>Calculated Results</h3>
+        <h3>Physics Dashboard</h3>
 
-        <p>Range: {range} m</p>
+        <div
+          style={{
+            background: "#111827",
+            padding: "20px",
+            borderRadius: "12px",
+            border: "1px solid #2563eb",
+            boxShadow: "0 0 10px rgba(37,99,235,0.5)",
+          }}
+        >
+          <p>Range: {range} m</p>
 
-        <p>
-          Maximum Height:
-          {maxHeight} m
-        </p>
+          <p>Maximum Height: {maxHeight} m</p>
+
+          <p>Flight Time: {flightTime} s</p>
+
+          <p>Horizontal Velocity: {horizontalVelocity} m/s</p>
+
+          <p>Vertical Velocity: {verticalVelocity} m/s</p>
+        </div>
       </div>
       <ProjectileCanvas
         angle={angle}
