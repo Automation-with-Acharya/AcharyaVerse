@@ -6,6 +6,12 @@ export default function ProjectileMotion() {
 
   const [velocity, setVelocity] = useState(20);
 
+  const [launchData, setLaunchData] = useState({
+    angle: 45,
+    velocity: 20,
+    key: 0,
+  });
+
   const g = 9.81;
 
   const range = (
@@ -61,6 +67,13 @@ export default function ProjectileMotion() {
         />
 
         <button
+          onClick={() =>
+            setLaunchData({
+              angle,
+              velocity,
+              key: Date.now(),
+            })
+          }
           style={{
             marginTop: "20px",
             padding: "10px 20px",
@@ -86,7 +99,11 @@ export default function ProjectileMotion() {
           {maxHeight} m
         </p>
       </div>
-      <ProjectileCanvas />
+      <ProjectileCanvas
+        angle={launchData.angle}
+        velocity={launchData.velocity}
+        launchKey={launchData.key}
+      />
     </div>
   );
 }

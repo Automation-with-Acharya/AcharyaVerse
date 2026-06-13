@@ -1,20 +1,52 @@
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import * as THREE from "three";
 
-function Ball() {
+type ProjectileCanvasProps = {
+  angle: number;
+  velocity: number;
+  launchKey: number;
+};
+
+function Ball({ angle, velocity, launchKey }: ProjectileCanvasProps) {
   const ref = useRef<THREE.Mesh>(null);
 
-  useFrame(({ clock }) => {
+  const elapsedRef = useRef(0);
+
+  useEffect(() => {
+    elapsedRef.current = 0;
+
+    if (ref.current) {
+      ref.current.position.set(0, 0, 0);
+    }
+  }, [launchKey]);
+
+  useFrame((_, delta) => {
     if (!ref.current) return;
 
-    const t = clock.getElapsedTime();
+    if (launchKey === 0) return;
 
-    const x = t * 2;
+    elapsedRef.current += delta;
 
-    const y = 3 + 2 * t - 0.5 * 2 * t * t;
+    const t = elapsedRef.current;
 
-    ref.current.position.set(x, Math.max(y, 0), 0);
+    const radians = (angle * Math.PI) / 180;
+
+    const vx = velocity * Math.cos(radians);
+
+    const vy = velocity * Math.sin(radians);
+
+    const g = 9.81;
+
+    const scale = 0.1;
+
+    const x = vx * t * scale;
+
+    const y = vy * t * scale - 0.5 * g * t * t * scale;
+
+    if (y < 0) return;
+
+    ref.current.position.set(x, y, 0);
   });
 
   return (
@@ -25,7 +57,11 @@ function Ball() {
   );
 }
 
-export default function ProjectileCanvas() {
+export default function ProjectileCanvas({
+  angle,
+  velocity,
+  launchKey,
+}: ProjectileCanvasProps) {
   return (
     <Canvas
       style={{
@@ -38,7 +74,7 @@ export default function ProjectileCanvas() {
     >
       <ambientLight intensity={2} />
 
-      <Ball />
+      <Ball angle={angle} velocity={velocity} launchKey={launchKey} />
 
       <gridHelper args={[20, 20]} />
     </Canvas>
