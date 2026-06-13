@@ -239,6 +239,10 @@ function Bodies({
 
   const orbitAngle = useRef(0);
 
+  const leftVelocity = useRef(new THREE.Vector3());
+
+  const rightVelocity = useRef(new THREE.Vector3());
+
   const totalMass = mass1 + mass2;
 
   const radiusA = (distance * mass2) / totalMass;
@@ -251,6 +255,10 @@ function Bodies({
     initialized.current = false;
 
     orbitAngle.current = 0;
+
+    leftVelocity.current.set(0, 0, 0);
+
+    rightVelocity.current.set(0, 0, 0);
 
     const initialPositions = createInitialPositions(distance);
 
@@ -298,19 +306,92 @@ function Bodies({
       initialized.current = true;
     }
 
-    const currentDistance = Math.abs(
-      rightRef.current.position.x - leftRef.current.position.x,
+    const displacement = new THREE.Vector3().subVectors(
+      rightRef.current.position,
+      leftRef.current.position,
     );
 
-    if (currentDistance < 1) return;
+    const currentDistance = displacement.length();
 
-    const force = (6.674 * mass1 * mass2) / (currentDistance * currentDistance);
+    const direction =
+      currentDistance > 0
+        ? displacement.clone().normalize()
+        : new THREE.Vector3(1, 0, 0);
 
-    const attractionSpeed = Math.min(force * 0.00001, 0.03);
+    const bodyRadiusA = Math.max(mass1 / 200, 0.5);
 
-    leftRef.current.position.x += attractionSpeed;
+    const bodyRadiusB = Math.max(mass2 / 200, 0.5);
 
-    rightRef.current.position.x -= attractionSpeed;
+    const contactDistance = bodyRadiusA + bodyRadiusB;
+
+    if (currentDistance <= contactDistance) {
+      const barycenter = leftRef.current.position
+        .clone()
+        .multiplyScalar(mass1)
+        .add(rightRef.current.position.clone().multiplyScalar(mass2))
+        .divideScalar(totalMass);
+
+      leftRef.current.position.copy(
+        barycenter
+          .clone()
+          .addScaledVector(direction, -(mass2 / totalMass) * contactDistance),
+      );
+
+      rightRef.current.position.copy(
+        barycenter
+          .clone()
+          .addScaledVector(direction, (mass1 / totalMass) * contactDistance),
+      );
+
+      leftVelocity.current.set(0, 0, 0);
+
+      rightVelocity.current.set(0, 0, 0);
+
+      return;
+    }
+
+    const softenedDistanceSquared = currentDistance * currentDistance + 0.8;
+
+    const accelerationA = direction
+      .clone()
+      .multiplyScalar((6.674 * mass2) / softenedDistanceSquared);
+
+    const accelerationB = direction
+      .clone()
+      .multiplyScalar((-6.674 * mass1) / softenedDistanceSquared);
+
+    const visualTimeScale = 0.08;
+
+    const maxRelativeSpeed = 0.18;
+
+    leftVelocity.current.addScaledVector(
+      accelerationA,
+      delta * visualTimeScale,
+    );
+
+    rightVelocity.current.addScaledVector(
+      accelerationB,
+      delta * visualTimeScale,
+    );
+
+    const relativeSpeed = new THREE.Vector3()
+      .subVectors(rightVelocity.current, leftVelocity.current)
+      .length();
+
+    if (relativeSpeed > maxRelativeSpeed) {
+      const scale = maxRelativeSpeed / relativeSpeed;
+
+      leftVelocity.current.multiplyScalar(scale);
+
+      rightVelocity.current.multiplyScalar(scale);
+    }
+
+    leftRef.current.position.addScaledVector(leftVelocity.current, delta * 60);
+
+    rightRef.current.position.addScaledVector(
+      rightVelocity.current,
+      delta * 60,
+    );
   });
 
   return (

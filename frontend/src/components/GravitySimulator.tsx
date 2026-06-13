@@ -24,11 +24,20 @@ export default function GravitySimulator() {
 
   const force = ((G * mass1 * mass2) / (distance * distance)).toFixed(2);
 
+  const accelerationA = ((G * mass2) / (distance * distance)).toFixed(2);
+
+  const accelerationB = ((G * mass1) / (distance * distance)).toFixed(2);
+
   const totalMass = mass1 + mass2;
 
   const massAOrbitRadius = ((distance * mass2) / totalMass).toFixed(2);
 
   const massBOrbitRadius = ((distance * mass1) / totalMass).toFixed(2);
+
+  const barycenterPosition = (
+    (mass1 * (-distance / 2) + mass2 * (distance / 2)) /
+    totalMass
+  ).toFixed(2);
 
   return (
     <div>
@@ -212,6 +221,12 @@ export default function GravitySimulator() {
             Force:
             {force}
           </p>
+
+          <p>Mass A acceleration: {accelerationA}</p>
+
+          <p>Mass B acceleration: {accelerationB}</p>
+
+          <p>Center of mass position: {barycenterPosition}</p>
 
           {orbitalMode && (
             <>
