@@ -1,4 +1,5 @@
 import { useState } from "react";
+import GravityCanvas from "./GravityCanvas";
 
 export default function GravitySimulator() {
   const [mass1, setMass1] = useState(100);
@@ -6,6 +7,14 @@ export default function GravitySimulator() {
   const [mass2, setMass2] = useState(100);
 
   const [distance, setDistance] = useState(10);
+
+  const [simulationRunning, setSimulationRunning] = useState(false);
+
+  const [simulationStatus, setSimulationStatus] = useState("Ready");
+
+  const [orbitalMode, setOrbitalMode] = useState(false);
+
+  const [simulationKey, setSimulationKey] = useState(0);
 
   const G = 6.674;
 
@@ -73,6 +82,71 @@ export default function GravitySimulator() {
             width: "100%",
           }}
         />
+        <button
+          onClick={() => {
+            setSimulationRunning(true);
+
+            setSimulationStatus("Running");
+          }}
+          style={{
+            padding: "10px 20px",
+            background: "#2563eb",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+          }}
+        >
+          Start Simulation
+        </button>
+
+        <button
+          onClick={() => {
+            setSimulationRunning(false);
+
+            setSimulationStatus("Ready");
+
+            setSimulationKey(Date.now());
+          }}
+          style={{
+            marginLeft: "10px",
+            padding: "10px 20px",
+            background: "#374151",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+          }}
+        >
+          Reset Simulation
+        </button>
+
+        <div
+          style={{
+            marginTop: "20px",
+            padding: "10px",
+            background: "#111827",
+            borderRadius: "8px",
+            border: "1px solid #2563eb",
+          }}
+        >
+          Simulation Status: <strong>{simulationStatus}</strong>
+        </div>
+
+        <div
+          style={{
+            marginTop: "20px",
+          }}
+        >
+          <label>
+            <input
+              type="checkbox"
+              checked={orbitalMode}
+              onChange={(e) => setOrbitalMode(e.target.checked)}
+            />{" "}
+            Orbital Mode
+          </label>
+        </div>
 
         <br />
         <br />
@@ -93,6 +167,15 @@ export default function GravitySimulator() {
           </p>
         </div>
       </div>
+
+      <GravityCanvas
+        mass1={mass1}
+        mass2={mass2}
+        distance={distance}
+        simulationRunning={simulationRunning}
+        simulationKey={simulationKey}
+        orbitalMode={orbitalMode}
+      />
     </div>
   );
 }
