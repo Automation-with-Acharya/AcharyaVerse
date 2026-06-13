@@ -50,11 +50,11 @@ function Bodies({
 
       const radius = distance / 2;
 
-      if (rightRef.current) {
-        rightRef.current.position.x = Math.cos(orbitAngle.current) * radius;
+      leftRef.current.position.set(0, 0, 0);
 
-        rightRef.current.position.z = Math.sin(orbitAngle.current) * radius;
-      }
+      rightRef.current.position.x = Math.cos(orbitAngle.current) * radius;
+
+      rightRef.current.position.z = Math.sin(orbitAngle.current) * radius;
 
       return;
     }
