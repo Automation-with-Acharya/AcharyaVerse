@@ -1,4 +1,5 @@
 import { useState } from "react";
+import ProjectileCanvas from "./ProjectileCanvas";
 
 export default function ProjectileMotion() {
   const [angle, setAngle] = useState(45);
@@ -85,6 +86,7 @@ export default function ProjectileMotion() {
           {maxHeight} m
         </p>
       </div>
+      <ProjectileCanvas />
     </div>
   );
 }
