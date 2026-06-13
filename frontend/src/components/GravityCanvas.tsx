@@ -12,6 +12,8 @@ type Props = {
   simulationRunning: boolean;
   simulationKey: number;
   orbitalMode: boolean;
+  showCurvature: boolean;
+  curvatureScale: number;
 };
 
 function createInitialPositions(distance: number) {
@@ -93,6 +95,132 @@ function ForceBeam({
   );
 }
 
+function GravityGrid({
+  mass1,
+  mass2,
+  leftRef,
+  rightRef,
+  showCurvature,
+  curvatureScale,
+}: {
+  mass1: number;
+  mass2: number;
+  leftRef: React.RefObject<THREE.Mesh | null>;
+  rightRef: React.RefObject<THREE.Mesh | null>;
+  showCurvature: boolean;
+  curvatureScale: number;
+}) {
+  const { geometry, basePoints } = useMemo(() => {
+    const size = 52;
+
+    const divisions = 50;
+
+    const spacing = size / divisions;
+
+    const generatedPositions: number[] = [];
+
+    const generatedBasePoints: { x: number; z: number }[] = [];
+
+    for (let index = 0; index <= divisions; index++) {
+      const lineOffset = -size / 2 + index * spacing;
+
+      const horizontalStart = { x: -size / 2, z: lineOffset };
+
+      const horizontalEnd = { x: size / 2, z: lineOffset };
+
+      const verticalStart = { x: lineOffset, z: -size / 2 };
+
+      const verticalEnd = { x: lineOffset, z: size / 2 };
+
+      for (let step = 0; step < divisions; step++) {
+        const start = -size / 2 + step * spacing;
+
+        const end = start + spacing;
+
+        const horizontalA = { x: start, z: horizontalStart.z };
+
+        const horizontalB = { x: end, z: horizontalEnd.z };
+
+        const verticalA = { x: verticalStart.x, z: start };
+
+        const verticalB = { x: verticalEnd.x, z: end };
+
+        [horizontalA, horizontalB, verticalA, verticalB].forEach((point) => {
+          generatedBasePoints.push(point);
+
+          generatedPositions.push(point.x, 0, point.z);
+        });
+      }
+    }
+
+    const gridGeometry = new THREE.BufferGeometry();
+
+    gridGeometry.setAttribute(
+      "position",
+      new THREE.BufferAttribute(new Float32Array(generatedPositions), 3),
+    );
+
+    return {
+      geometry: gridGeometry,
+      basePoints: generatedBasePoints,
+    };
+  }, []);
+
+  useFrame(() => {
+    const positionAttribute = geometry.getAttribute(
+      "position",
+    ) as THREE.BufferAttribute;
+
+    if (!showCurvature || !leftRef.current || !rightRef.current) {
+      basePoints.forEach((_, index) => {
+        positionAttribute.setY(index, 0);
+      });
+
+      positionAttribute.needsUpdate = true;
+
+      return;
+    }
+
+    const leftPosition = leftRef.current.position;
+
+    const rightPosition = rightRef.current.position;
+
+    basePoints.forEach((point, index) => {
+      const distanceToA = Math.hypot(
+        point.x - leftPosition.x,
+        point.z - leftPosition.z,
+      );
+
+      const distanceToB = Math.hypot(
+        point.x - rightPosition.x,
+        point.z - rightPosition.z,
+      );
+
+      const wellA =
+        curvatureScale * (mass1 / 1000) * (4 / Math.sqrt(distanceToA + 1.8));
+
+      const wellB =
+        curvatureScale * (mass2 / 1000) * (4 / Math.sqrt(distanceToB + 1.8));
+
+      const depression = Math.min(wellA + wellB, 7);
+
+      positionAttribute.setY(index, -depression);
+    });
+
+    positionAttribute.needsUpdate = true;
+  });
+
+  return (
+    <lineSegments geometry={geometry}>
+      <lineBasicMaterial
+        color="white"
+        transparent
+        opacity={showCurvature ? 0.75 : 0.45}
+      />
+    </lineSegments>
+  );
+}
+
 function Bodies({
   mass1,
   mass2,
@@ -100,6 +228,8 @@ function Bodies({
   simulationRunning,
   simulationKey,
   orbitalMode,
+  showCurvature,
+  curvatureScale,
 }: Props) {
   const leftRef = useRef<THREE.Mesh>(null);
 
@@ -199,6 +329,15 @@ function Bodies({
         </>
       )}
 
+      <GravityGrid
+        mass1={mass1}
+        mass2={mass2}
+        leftRef={leftRef}
+        rightRef={rightRef}
+        showCurvature={showCurvature}
+        curvatureScale={curvatureScale}
+      />
+
       <mesh ref={leftRef} position={[-distance / 2, 0, 0]}>
         <sphereGeometry args={[Math.max(mass1 / 200, 0.5), 32, 32]} />
 
@@ -227,6 +366,8 @@ export default function GravityCanvas({
   simulationRunning,
   simulationKey,
   orbitalMode,
+  showCurvature,
+  curvatureScale,
 }: Props) {
   return (
     <Canvas
@@ -247,9 +388,10 @@ export default function GravityCanvas({
         simulationRunning={simulationRunning}
         simulationKey={simulationKey}
         orbitalMode={orbitalMode}
+        showCurvature={showCurvature}
+        curvatureScale={curvatureScale}
       />
 
-      <gridHelper args={[50, 50]} />
     </Canvas>
   );
 }

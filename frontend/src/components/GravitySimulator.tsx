@@ -14,6 +14,10 @@ export default function GravitySimulator() {
 
   const [orbitalMode, setOrbitalMode] = useState(false);
 
+  const [showCurvature, setShowCurvature] = useState(false);
+
+  const [curvatureScale, setCurvatureScale] = useState(3);
+
   const [simulationKey, setSimulationKey] = useState(0);
 
   const G = 6.674;
@@ -154,6 +158,43 @@ export default function GravitySimulator() {
           </label>
         </div>
 
+        <div
+          style={{
+            marginTop: "12px",
+          }}
+        >
+          <label>
+            <input
+              type="checkbox"
+              checked={showCurvature}
+              onChange={(e) => setShowCurvature(e.target.checked)}
+            />{" "}
+            Spacetime Curvature
+          </label>
+        </div>
+
+        {showCurvature && (
+          <div
+            style={{
+              marginTop: "16px",
+            }}
+          >
+            <div>Curvature Scale: {curvatureScale.toFixed(1)}x</div>
+
+            <input
+              type="range"
+              min="1"
+              max="8"
+              step="0.5"
+              value={curvatureScale}
+              onChange={(e) => setCurvatureScale(Number(e.target.value))}
+              style={{
+                width: "100%",
+              }}
+            />
+          </div>
+        )}
+
         <br />
         <br />
 
@@ -181,6 +222,13 @@ export default function GravitySimulator() {
               <p>Mass B orbit radius: {massBOrbitRadius}</p>
             </>
           )}
+
+          {showCurvature && (
+            <p>
+              Curvature: gravity wells deepen as mass increases, visually
+              scaled {curvatureScale.toFixed(1)}x
+            </p>
+          )}
         </div>
       </div>
 
@@ -191,6 +239,8 @@ export default function GravitySimulator() {
         simulationRunning={simulationRunning}
         simulationKey={simulationKey}
         orbitalMode={orbitalMode}
+        showCurvature={showCurvature}
+        curvatureScale={curvatureScale}
       />
     </div>
   );
