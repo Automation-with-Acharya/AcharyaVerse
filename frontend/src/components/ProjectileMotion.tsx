@@ -6,6 +6,12 @@ export default function ProjectileMotion() {
 
   const [velocity, setVelocity] = useState(20);
 
+  const [simulationSpeed, setSimulationSpeed] = useState(1);
+
+  const [followProjectile, setFollowProjectile] = useState(true);
+
+  const [resetCamera, setResetCamera] = useState(false);
+
   const [launchData, setLaunchData] = useState({
     angle: 45,
     velocity: 20,
@@ -65,6 +71,41 @@ export default function ProjectileMotion() {
             width: "100%",
           }}
         />
+        <div
+          style={{
+            marginTop: "20px",
+          }}
+        >
+          Simulation Speed:
+          {simulationSpeed.toFixed(1)}x
+        </div>
+
+        <input
+          type="range"
+          min="0.1"
+          max="5"
+          step="0.1"
+          value={simulationSpeed}
+          onChange={(e) => setSimulationSpeed(Number(e.target.value))}
+          style={{
+            width: "100%",
+          }}
+        />
+
+        <div
+          style={{
+            marginTop: "20px",
+          }}
+        >
+          <label>
+            <input
+              type="checkbox"
+              checked={followProjectile}
+              onChange={(e) => setFollowProjectile(e.target.checked)}
+            />{" "}
+            Follow Projectile
+          </label>
+        </div>
 
         <button
           onClick={() =>
@@ -87,6 +128,21 @@ export default function ProjectileMotion() {
           Launch Projectile
         </button>
 
+        <button
+          onClick={() => setResetCamera(true)}
+          style={{
+            marginLeft: "10px",
+            padding: "10px 20px",
+            background: "#374151",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+          }}
+        >
+          Reset Camera
+        </button>
+
         <br />
         <br />
 
@@ -100,9 +156,13 @@ export default function ProjectileMotion() {
         </p>
       </div>
       <ProjectileCanvas
-        angle={launchData.angle}
-        velocity={launchData.velocity}
+        angle={angle}
+        velocity={velocity}
         launchKey={launchData.key}
+        simulationSpeed={simulationSpeed}
+        followProjectile={followProjectile}
+        resetCamera={resetCamera}
+        onCameraReset={() => setResetCamera(false)}
       />
     </div>
   );
