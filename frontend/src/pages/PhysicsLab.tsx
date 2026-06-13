@@ -2,6 +2,7 @@ import PlanetPageLayout from "../components/PlanetPageLayout";
 import OrbitalSimulation from "../components/OrbitalSimulation";
 import { useState } from "react";
 import ProjectileMotion from "../components/ProjectileMotion";
+import GravitySimulator from "../components/GravitySimulator";
 
 export default function PhysicsLab() {
   const [selectedExperiment, setSelectedExperiment] = useState("orbital");
@@ -25,11 +26,22 @@ export default function PhysicsLab() {
         >
           Projectile Motion
         </button>
+
+        <button
+          onClick={() => setSelectedExperiment("gravity")}
+          style={{
+            marginLeft: "10px",
+          }}
+        >
+          Gravity Simulator
+        </button>
       </div>
 
       {selectedExperiment === "orbital" && <OrbitalSimulation />}
 
       {selectedExperiment === "projectile" && <ProjectileMotion />}
+
+      {selectedExperiment === "gravity" && <GravitySimulator />}
     </PlanetPageLayout>
   );
 }
