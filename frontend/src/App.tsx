@@ -2,99 +2,168 @@ import SpaceScene from "./components/SpaceScene";
 import { useState } from "react";
 import PlanetInfo from "./components/PlanetInfo";
 import { Routes, Route } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 
-import Projects from "./pages/Projects";
-import Skills from "./pages/Skills";
-import Experience from "./pages/Experience";
-import AiMayank from "./pages/AiMayank";
-import PhysicsLab from "./pages/PhysicsLab";
-import Resume from "./pages/Resume";
-import Contact from "./pages/Contact";
+import Projects    from "./pages/Projects";
+import Skills      from "./pages/Skills";
+import Experience  from "./pages/Experience";
+import AiMayank   from "./pages/AiMayank";
+import PhysicsLab  from "./pages/PhysicsLab";
+import Resume      from "./pages/Resume";
+import Contact     from "./pages/Contact";
 
-function App() {
+function UniverseHome() {
   const [selectedPlanet, setSelectedPlanet] = useState<string | null>(null);
   const [enteredUniverse, setEnteredUniverse] = useState(false);
 
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          <div
-            style={{
-              width: "100vw",
-              height: "100vh",
-              position: "relative",
-              background: "black",
-            }}
-          >
-            <SpaceScene
-              selectedPlanet={selectedPlanet}
-              setSelectedPlanet={setSelectedPlanet}
-            />
-
-            <PlanetInfo selectedPlanet={selectedPlanet} />
-
-            {!enteredUniverse && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  color: "white",
-                  textAlign: "center",
-                }}
-              >
-                <h1
-                  style={{
-                    fontSize: "4rem",
-                    marginBottom: "15px",
-                  }}
-                >
-                  ACHARYAVERSE
-                </h1>
-
-                <p
-                  style={{
-                    fontSize: "1.2rem",
-                  }}
-                >
-                  Exploring Software, AI and Physics
-                </p>
-
-                <button
-                  style={{
-                    marginTop: "25px",
-                    padding: "12px 30px",
-                    borderRadius: "10px",
-                    border: "none",
-                    cursor: "pointer",
-                    fontSize: "1rem",
-                  }}
-                  onClick={() => setEnteredUniverse(true)}
-                >
-                  ENTER UNIVERSE
-                </button>
-              </div>
-            )}
-          </div>
-        }
+    <div style={{ width: "100vw", height: "100vh", position: "relative", background: "#000005" }}>
+      <SpaceScene
+        selectedPlanet={selectedPlanet}
+        setSelectedPlanet={setSelectedPlanet}
       />
 
-      <Route path="/projects" element={<Projects />} />
+      <PlanetInfo
+        selectedPlanet={selectedPlanet}
+        setSelectedPlanet={setSelectedPlanet}
+      />
 
-      <Route path="/skills" element={<Skills />} />
+      {/* Entry overlay */}
+      <AnimatePresence>
+        {!enteredUniverse && (
+          <motion.div
+            key="entry-overlay"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.2, ease: "easeInOut" }}
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              background:
+                "radial-gradient(ellipse at center, rgba(10,5,40,0.95) 0%, rgba(0,0,5,0.98) 100%)",
+              zIndex: 10,
+              textAlign: "center",
+              padding: "40px",
+            }}
+          >
+            {/* Animated title */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 1, ease: "easeOut" }}
+            >
+              <div
+                style={{
+                  fontFamily: "'Orbitron', monospace",
+                  fontSize: "clamp(2.5rem, 8vw, 5.5rem)",
+                  fontWeight: 900,
+                  letterSpacing: "0.15em",
+                  background: "linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #34d399 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  marginBottom: "12px",
+                  lineHeight: 1.1,
+                }}
+              >
+                ACHARYAVERSE
+              </div>
 
-      <Route path="/experience" element={<Experience />} />
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8, duration: 0.8 }}
+                style={{
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontSize: "clamp(0.9rem, 2vw, 1.2rem)",
+                  color: "#94a3b8",
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase",
+                  marginBottom: "10px",
+                }}
+              >
+                Software Engineer · Automation Expert · AI Builder
+              </motion.p>
 
-      <Route path="/ai-mayank" element={<AiMayank />} />
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.1, duration: 0.8 }}
+                style={{
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontSize: "clamp(0.75rem, 1.5vw, 0.95rem)",
+                  color: "#60a5fa",
+                  letterSpacing: "0.15em",
+                  marginBottom: "50px",
+                  opacity: 0.8,
+                }}
+              >
+                Exploring the universe of technology, one planet at a time
+              </motion.p>
 
-      <Route path="/physics-lab" element={<PhysicsLab />} />
+              <motion.button
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 1.4, duration: 0.6, type: "spring" }}
+                whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(96,165,250,0.5)" }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setEnteredUniverse(true)}
+                style={{
+                  padding: "16px 48px",
+                  background: "linear-gradient(135deg, #1d4ed8, #4f46e5)",
+                  color: "white",
+                  border: "1px solid rgba(96,165,250,0.3)",
+                  borderRadius: "50px",
+                  cursor: "pointer",
+                  fontFamily: "'Orbitron', monospace",
+                  fontSize: "0.9rem",
+                  fontWeight: 600,
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase",
+                  boxShadow: "0 0 20px rgba(79,70,229,0.4)",
+                  transition: "all 0.3s ease",
+                }}
+              >
+                ✦ ENTER UNIVERSE
+              </motion.button>
 
-      <Route path="/resume" element={<Resume />} />
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 2, duration: 1 }}
+                style={{
+                  marginTop: "24px",
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontSize: "0.8rem",
+                  color: "#475569",
+                  letterSpacing: "0.1em",
+                }}
+              >
+                Click a planet to explore · Scroll to zoom · Drag to orbit
+              </motion.p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
-      <Route path="/contact" element={<Contact />} />
+function App() {
+  return (
+    <Routes>
+      <Route path="/"             element={<UniverseHome />} />
+      <Route path="/projects"     element={<Projects />} />
+      <Route path="/skills"       element={<Skills />} />
+      <Route path="/experience"   element={<Experience />} />
+      <Route path="/ai-mayank"    element={<AiMayank />} />
+      <Route path="/physics-lab"  element={<PhysicsLab />} />
+      <Route path="/resume"       element={<Resume />} />
+      <Route path="/contact"      element={<Contact />} />
     </Routes>
   );
 }

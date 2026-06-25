@@ -7,9 +7,11 @@ type PlanetProps = {
   position: [number, number, number];
   color: string;
   name: string;
-
+  size?: number;
+  emoji?: string;
+  glowColor?: string;
+  tagline?: string;
   selectedPlanet: string | null;
-
   setSelectedPlanet: (name: string | null) => void;
 };
 
@@ -17,44 +19,84 @@ export default function Planet({
   position,
   color,
   name,
+  size = 0.7,
+  glowColor,
+  tagline,
   selectedPlanet,
   setSelectedPlanet,
 }: PlanetProps) {
-  const textRef = useRef<THREE.Group>(null);
-
-  const ref = useRef<THREE.Mesh>(null);
+  const meshRef   = useRef<THREE.Mesh>(null);
+  const glowRef   = useRef<THREE.Mesh>(null);
+  const groupRef  = useRef<THREE.Group>(null);
+  const labelRef  = useRef<THREE.Group>(null);
 
   const [hovered, setHovered] = useState(false);
+  const isSelected = selectedPlanet === name;
 
-  useFrame(({ clock }) => {
-    if (!ref.current) return;
+  const effectiveGlow = glowColor ?? color;
 
-    ref.current.rotation.y += 0.01;
+  useFrame(({ clock, camera }) => {
+    const t = clock.getElapsedTime();
 
-    ref.current.position.y =
-      position[1] + Math.sin(clock.getElapsedTime() + position[0]) * 0.2;
+    if (!meshRef.current || !groupRef.current) return;
 
-    let scale = 1;
+    // Gentle floating bob
+    const floatY = Math.sin(t * 0.8 + position[0]) * 0.18;
+    groupRef.current.position.y = position[1] + floatY;
+    groupRef.current.position.x = position[0];
+    groupRef.current.position.z = position[2];
 
-    if (hovered) scale = 1.2;
+    // Self-rotation
+    meshRef.current.rotation.y += 0.006;
+    meshRef.current.rotation.x += 0.001;
 
-    if (selectedPlanet === name) scale = 2;
+    // Scale on hover / select
+    const targetScale = isSelected ? 1.35 : hovered ? 1.15 : 1.0;
+    meshRef.current.scale.lerp(
+      new THREE.Vector3(targetScale, targetScale, targetScale),
+      0.1
+    );
 
-    ref.current.scale.set(scale, scale, scale);
+    // Glow pulse
+    if (glowRef.current) {
+      const glowMat = glowRef.current.material as THREE.MeshBasicMaterial;
+      glowMat.opacity = (isSelected ? 0.22 : hovered ? 0.14 : 0.08)
+        + Math.sin(t * 1.5) * 0.03;
+    }
 
-    if (textRef.current) {
-      textRef.current.position.y =
-        position[1] +
-        Math.sin(clock.getElapsedTime() + position[0]) * 0.2 -
-        1.2;
+    // Billboard labels toward camera
+    if (labelRef.current) {
+      labelRef.current.lookAt(camera.position);
+      labelRef.current.position.y = floatY - size - 0.55;
     }
   });
 
   return (
-    <>
+    <group ref={groupRef} position={position}>
+      {/* Atmospheric glow aura */}
+      <mesh ref={glowRef}>
+        <sphereGeometry args={[size * 1.6, 32, 32]} />
+        <meshBasicMaterial
+          color={effectiveGlow}
+          transparent
+          opacity={0.08}
+          side={THREE.BackSide}
+        />
+      </mesh>
+
+      {/* Equatorial ring */}
+      <mesh rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[size * 1.55, 0.012, 8, 64]} />
+        <meshBasicMaterial
+          color={effectiveGlow}
+          transparent
+          opacity={isSelected ? 0.6 : hovered ? 0.35 : 0.18}
+        />
+      </mesh>
+
+      {/* Planet body */}
       <mesh
-        ref={ref}
-        position={position}
+        ref={meshRef}
         onPointerOver={() => {
           document.body.style.cursor = "pointer";
           setHovered(true);
@@ -63,23 +105,45 @@ export default function Planet({
           document.body.style.cursor = "default";
           setHovered(false);
         }}
-        onClick={() => {
-          setSelectedPlanet(name);
-        }}
+        onClick={() => setSelectedPlanet(isSelected ? null : name)}
       >
-        <sphereGeometry args={[0.7, 64, 64]} />
-
-        <meshStandardMaterial color={color} roughness={0.4} metalness={0.3} />
+        <sphereGeometry args={[size, 64, 64]} />
+        <meshStandardMaterial
+          color={color}
+          roughness={0.45}
+          metalness={0.25}
+          emissive={effectiveGlow}
+          emissiveIntensity={isSelected ? 0.35 : hovered ? 0.2 : 0.05}
+        />
       </mesh>
 
-      <group
-        ref={textRef}
-        position={[position[0], position[1] - 1.2, position[2]]}
-      >
-        <Text fontSize={0.25} color="white">
+      {/* Floating label */}
+      <group ref={labelRef} position={[0, -size - 0.55, 0]}>
+        <Text
+          fontSize={0.22}
+          color="white"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.02}
+          outlineColor="#000000"
+          font={undefined}
+        >
           {name}
         </Text>
+        {tagline && (
+          <Text
+            fontSize={0.13}
+            color={effectiveGlow}
+            anchorX="center"
+            anchorY="middle"
+            position={[0, -0.3, 0]}
+            outlineWidth={0.01}
+            outlineColor="#000000"
+          >
+            {tagline}
+          </Text>
+        )}
       </group>
-    </>
+    </group>
   );
 }

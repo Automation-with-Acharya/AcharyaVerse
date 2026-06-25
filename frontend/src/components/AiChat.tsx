@@ -1,245 +1,384 @@
 import { useState, useEffect, useRef } from "react";
 import { knowledge } from "../data/knowledge";
+import { motion, AnimatePresence } from "framer-motion";
 
 type Message = {
+  id: number;
   sender: "user" | "ai";
   text: string;
+  timestamp: Date;
 };
 
+const SUGGESTED = [
+  { label: "Who are you?",       question: "Who is Mayank Acharya?" },
+  { label: "Experience",         question: "Tell me about your experience at Bank of America" },
+  { label: "Projects",           question: "What projects have you built?" },
+  { label: "Skills",             question: "What are your technical skills?" },
+  { label: "Automation",         question: "Tell me about your automation work" },
+  { label: "AI Goals",           question: "What are your AI and future goals?" },
+  { label: "Physics",            question: "Why do you love physics?" },
+  { label: "Achievements",       question: "What are your key achievements?" },
+  { label: "Contact",            question: "How can I contact you?" },
+];
+
+function getResponse(question: string): string {
+  const lower = question.toLowerCase();
+
+  // Score each knowledge key by how many keywords it matches
+  let bestKey = "";
+  let bestScore = 0;
+
+  for (const key of Object.keys(knowledge)) {
+    const keyWords = key.split(/\s+/);
+    let score = 0;
+    for (const kw of keyWords) {
+      if (lower.includes(kw)) score += 2;
+    }
+    // Also check if any word in the question partially matches the key
+    const qWords = lower.split(/\s+/);
+    for (const qw of qWords) {
+      if (key.includes(qw) && qw.length > 3) score += 1;
+    }
+    if (score > bestScore) {
+      bestScore = score;
+      bestKey = key;
+    }
+  }
+
+  if (bestScore > 0 && bestKey) return knowledge[bestKey];
+
+  // Topic-specific fallback patterns
+  if (lower.includes("hello") || lower.includes("hi") || lower.includes("hey"))
+    return knowledge["hello"];
+
+  if (lower.includes("help") || lower.includes("what can"))
+    return knowledge["help"];
+
+  if (lower.includes("who") || lower.includes("mayank") || lower.includes("yourself"))
+    return knowledge["who"];
+
+  return "That's an interesting question! I am AI Mayank and I know about Mayank's career, skills, projects, physics passion and future goals. Try asking about any of those topics!";
+}
+
+function TypingDots() {
+  return (
+    <div style={{ display: "flex", gap: "4px", alignItems: "center", padding: "4px 0" }}>
+      {[0, 1, 2].map((i) => (
+        <motion.div
+          key={i}
+          animate={{ scale: [1, 1.4, 1], opacity: [0.4, 1, 0.4] }}
+          transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.2 }}
+          style={{
+            width: "6px",
+            height: "6px",
+            borderRadius: "50%",
+            background: "#a78bfa",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 export default function AiChat() {
-  const [input, setInput] = useState("");
-
+  const [input, setInput]     = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [msgId, setMsgId]     = useState(100);
 
-  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const chatRef  = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const [messages, setMessages] = useState<Message[]>([
     {
+      id: 0,
       sender: "ai",
-      text: "Hello, I am AI Mayank. Ask me anything.",
+      text: "Hello! I am AI Mayank — a digital twin powered by Mayank's personal knowledge base. Ask me anything about his career, projects, skills, or physics passion! 🚀",
+      timestamp: new Date(),
     },
   ]);
 
   useEffect(() => {
-    if (!chatContainerRef.current) return;
-
-    chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    if (chatRef.current) {
+      chatRef.current.scrollTo({ top: chatRef.current.scrollHeight, behavior: "smooth" });
+    }
   }, [messages, isTyping]);
 
   const sendMessage = (customQuestion?: string) => {
-    const question = customQuestion ?? input;
+    const question = (customQuestion ?? input).trim();
+    if (!question) return;
 
-    if (!question.trim()) return;
-
-    const userMessage: Message = {
+    const userMsg: Message = {
+      id: msgId,
       sender: "user",
       text: question,
+      timestamp: new Date(),
     };
 
-    let aiResponse = "That's an interesting question.";
-
-    const lower = question.toLowerCase();
-
-    if (lower.includes("experience")) {
-      aiResponse = knowledge.experience;
-    }
-
-    if (lower.includes("skills")) {
-      aiResponse = knowledge.skills;
-    }
-
-    if (lower.includes("physics")) {
-      aiResponse = knowledge.physics;
-    }
-
-    if (lower.includes("project")) {
-      aiResponse = knowledge.projects;
-    }
-
-    if (lower.includes("future")) {
-      aiResponse = knowledge.future;
-    }
-
-    setMessages((prev) => [...prev, userMessage]);
-
+    setMessages((prev) => [...prev, userMsg]);
     setInput("");
-
     setIsTyping(true);
+    setMsgId((n) => n + 2);
+
+    const response = getResponse(question);
+
+    // Simulate realistic typing delay based on response length
+    const delay = Math.min(800 + response.length * 10, 2500);
 
     setTimeout(() => {
       setMessages((prev) => [
         ...prev,
         {
+          id: msgId + 1,
           sender: "ai",
-          text: aiResponse,
+          text: response,
+          timestamp: new Date(),
         },
       ]);
-
       setIsTyping(false);
-    }, 1000);
+    }, delay);
   };
 
-  const askQuestion = (question: string) => {
-    sendMessage(question);
-  };
-
-  const suggestionQuestions = [
-    {
-      label: "Experience",
-      question: "Tell me about your experience",
-    },
-    {
-      label: "Skills",
-      question: "What are your skills?",
-    },
-    {
-      label: "Projects",
-      question: "Tell me about your projects",
-    },
-    {
-      label: "Future",
-      question: "What are your future goals?",
-    },
-    {
-      label: "Physics",
-      question: "Why do you like physics?",
-    },
-  ];
+  const formatTime = (d: Date) =>
+    d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
 
   return (
-    <div>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      {/* Suggestion chips */}
       <div
         style={{
           marginBottom: "20px",
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "8px",
         }}
       >
-        <h3>Try Asking:</h3>
-
-        {suggestionQuestions.map((item) => (
-          <button
+        {SUGGESTED.map((item) => (
+          <motion.button
             key={item.label}
-            onClick={() => askQuestion(item.question)}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => sendMessage(item.question)}
             style={{
-              padding: "8px 14px",
-              marginRight: "8px",
-              marginBottom: "8px",
-              borderRadius: "20px",
-              border: "1px solid #2563eb",
-              background: "#111827",
-              color: "white",
+              padding: "7px 14px",
+              borderRadius: "50px",
+              border: "1px solid rgba(167,139,250,0.3)",
+              background: "rgba(167,139,250,0.08)",
+              color: "#a78bfa",
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: "0.78rem",
               cursor: "pointer",
+              transition: "all 0.2s ease",
+              letterSpacing: "0.02em",
             }}
           >
             {item.label}
-          </button>
+          </motion.button>
         ))}
       </div>
 
+      {/* Chat window */}
       <div
-        ref={chatContainerRef}
+        ref={chatRef}
         style={{
-          height: "65vh",
+          flex: 1,
+          minHeight: "400px",
+          maxHeight: "60vh",
           overflowY: "auto",
-          border: "1px solid #333",
+          background: "rgba(2,8,20,0.7)",
+          border: "1px solid rgba(167,139,250,0.15)",
+          borderRadius: "16px",
           padding: "20px",
-          marginBottom: "20px",
-          borderRadius: "12px",
-          background: "#0f172a",
+          marginBottom: "16px",
+          scrollbarWidth: "thin",
+          scrollbarColor: "#a78bfa #0f172a",
         }}
       >
-        {messages.map((message, index) => (
-          <div
-            key={index}
-            style={{
-              display: "flex",
-              justifyContent:
-                message.sender === "user" ? "flex-end" : "flex-start",
-              marginBottom: "12px",
-            }}
-          >
-            <div
+        <AnimatePresence initial={false}>
+          {messages.map((msg) => (
+            <motion.div
+              key={msg.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
               style={{
-                background: message.sender === "user" ? "#2563eb" : "#1e293b",
-                padding: "12px",
-                borderRadius: "12px",
-                maxWidth: "70%",
-                color: "white",
+                display: "flex",
+                justifyContent: msg.sender === "user" ? "flex-end" : "flex-start",
+                marginBottom: "16px",
+                gap: "10px",
+                alignItems: "flex-end",
               }}
             >
-              <strong>{message.sender === "user" ? "You" : "AI Mayank"}</strong>
+              {/* AI avatar */}
+              {msg.sender === "ai" && (
+                <div
+                  style={{
+                    width: "32px",
+                    height: "32px",
+                    borderRadius: "50%",
+                    background: "linear-gradient(135deg, #6d28d9, #a78bfa)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "0.9rem",
+                    flexShrink: 0,
+                  }}
+                >
+                  🤖
+                </div>
+              )}
 
-              <div
-                style={{
-                  marginTop: "5px",
-                }}
-              >
-                {message.text}
+              <div style={{ maxWidth: "72%" }}>
+                {/* Sender label */}
+                <div
+                  style={{
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontSize: "0.7rem",
+                    color: "#475569",
+                    marginBottom: "4px",
+                    textAlign: msg.sender === "user" ? "right" : "left",
+                  }}
+                >
+                  {msg.sender === "user" ? "You" : "AI Mayank"} · {formatTime(msg.timestamp)}
+                </div>
+
+                {/* Bubble */}
+                <div
+                  style={{
+                    background:
+                      msg.sender === "user"
+                        ? "linear-gradient(135deg, #1d4ed8, #4f46e5)"
+                        : "rgba(167,139,250,0.1)",
+                    border:
+                      msg.sender === "user"
+                        ? "1px solid rgba(79,70,229,0.4)"
+                        : "1px solid rgba(167,139,250,0.2)",
+                    padding: "12px 16px",
+                    borderRadius:
+                      msg.sender === "user"
+                        ? "16px 16px 4px 16px"
+                        : "16px 16px 16px 4px",
+                    color: "white",
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontSize: "0.875rem",
+                    lineHeight: 1.65,
+                  }}
+                >
+                  {msg.text}
+                </div>
               </div>
-            </div>
-          </div>
-        ))}
 
-        {isTyping && (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-start",
-              marginBottom: "12px",
-            }}
-          >
-            <div
-              style={{
-                background: "#1e293b",
-                padding: "12px",
-                borderRadius: "12px",
-                color: "white",
-              }}
+              {/* User avatar */}
+              {msg.sender === "user" && (
+                <div
+                  style={{
+                    width: "32px",
+                    height: "32px",
+                    borderRadius: "50%",
+                    background: "linear-gradient(135deg, #1d4ed8, #4f46e5)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "0.9rem",
+                    flexShrink: 0,
+                  }}
+                >
+                  👤
+                </div>
+              )}
+            </motion.div>
+          ))}
+        </AnimatePresence>
+
+        {/* Typing indicator */}
+        <AnimatePresence>
+          {isTyping && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              style={{ display: "flex", alignItems: "flex-end", gap: "10px", marginBottom: "8px" }}
             >
-              <strong>AI Mayank</strong>
-
               <div
                 style={{
-                  marginTop: "5px",
+                  width: "32px",
+                  height: "32px",
+                  borderRadius: "50%",
+                  background: "linear-gradient(135deg, #6d28d9, #a78bfa)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "0.9rem",
                 }}
               >
-                Thinking...
+                🤖
               </div>
-            </div>
-          </div>
-        )}
+              <div
+                style={{
+                  background: "rgba(167,139,250,0.1)",
+                  border: "1px solid rgba(167,139,250,0.2)",
+                  padding: "12px 16px",
+                  borderRadius: "16px 16px 16px 4px",
+                }}
+              >
+                <TypingDots />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      <input
-        autoFocus
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            sendMessage();
-          }
-        }}
-        style={{
-          width: "80%",
-          padding: "12px",
-          borderRadius: "8px",
-          border: "1px solid #444",
-        }}
-      />
+      {/* Input row */}
+      <div style={{ display: "flex", gap: "10px" }}>
+        <input
+          ref={inputRef}
+          autoFocus
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              sendMessage();
+            }
+          }}
+          placeholder="Ask me anything about Mayank..."
+          style={{
+            flex: 1,
+            padding: "14px 18px",
+            background: "rgba(2,8,20,0.8)",
+            border: "1px solid rgba(167,139,250,0.25)",
+            borderRadius: "12px",
+            color: "white",
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontSize: "0.9rem",
+            outline: "none",
+            transition: "border-color 0.2s ease",
+          }}
+        />
 
-      <button
-        onClick={() => sendMessage()}
-        style={{
-          marginLeft: "10px",
-          padding: "12px 18px",
-          background: "#2563eb",
-          color: "white",
-          border: "none",
-          borderRadius: "8px",
-          cursor: "pointer",
-        }}
-      >
-        Send
-      </button>
+        <motion.button
+          whileHover={{ scale: 1.04, boxShadow: "0 0 20px rgba(109,40,217,0.4)" }}
+          whileTap={{ scale: 0.97 }}
+          onClick={() => sendMessage()}
+          disabled={isTyping}
+          style={{
+            padding: "14px 22px",
+            background: "linear-gradient(135deg, #6d28d9, #a78bfa)",
+            color: "white",
+            border: "none",
+            borderRadius: "12px",
+            cursor: isTyping ? "not-allowed" : "pointer",
+            fontFamily: "'Orbitron', monospace",
+            fontSize: "0.82rem",
+            fontWeight: 600,
+            letterSpacing: "0.06em",
+            opacity: isTyping ? 0.6 : 1,
+            transition: "opacity 0.2s ease",
+            whiteSpace: "nowrap",
+          }}
+        >
+          Send →
+        </motion.button>
+      </div>
     </div>
   );
 }

@@ -1,30 +1,36 @@
 export const planetContent = {
-  Projects: {
+  Resume: {
     description:
-      "Explore software engineering projects, dashboards, automation solutions and experiments.",
-  },
-
-  Skills: {
-    description:
-      "View technical skills including .NET, Python, React, Power BI, UiPath and DevOps.",
+      "Explore the journey of Mayank Acharya — software engineer, automation expert, and aspiring AI builder. Education, certifications and career at a glance.",
   },
 
   Experience: {
     description:
-      "Learn about professional experience at Bank of America and other engineering work.",
+      "6+ years at Bank of America Continuum India. From .NET development to leading a team of 6 across DevOps, analytics and automation streams.",
+  },
+
+  Projects: {
+    description:
+      "From AcharyaVerse to enterprise automation — explore real-world projects spanning React, Python, UiPath, Power BI, and AI systems.",
+  },
+
+  Skills: {
+    description:
+      "An interactive galaxy of technical skills: .NET, Python, React, TypeScript, UiPath, Power BI, DevOps, AI, and more.",
   },
 
   "AI Mayank": {
-    description: "Talk with an AI-powered digital twin of Mayank Acharya.",
+    description:
+      "A digital twin powered by a personal knowledge base. Ask about career, projects, physics, or anything about Mayank.",
   },
 
   "Physics Lab": {
     description:
-      "Interactive simulations of gravity, orbits, black holes and physics experiments.",
+      "Interactive simulations of gravity, orbital mechanics, projectile motion and spacetime curvature — where code meets physics.",
   },
 
-  Resume: {
+  Contact: {
     description:
-      "Explore Mayank Acharya's professional profile, skills and achievements.",
+      "Send a signal across the universe. Connect via LinkedIn, GitHub, or email — or download the resume directly.",
   },
 };
