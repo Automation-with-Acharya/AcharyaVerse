@@ -14,7 +14,17 @@ import Contact     from "./pages/Contact";
 
 function UniverseHome() {
   const [selectedPlanet, setSelectedPlanet] = useState<string | null>(null);
-  const [enteredUniverse, setEnteredUniverse] = useState(false);
+
+  // Persist across React Router navigations — session only (clears on tab close)
+  const [enteredUniverse, setEnteredUniverse] = useState<boolean>(
+    () => sessionStorage.getItem("acharyaverse_entered") === "true"
+  );
+
+  const handleEnter = () => {
+    sessionStorage.setItem("acharyaverse_entered", "true");
+    setEnteredUniverse(true);
+  };
+
 
   return (
     <div style={{ width: "100vw", height: "100vh", position: "relative", background: "#000005" }}>
@@ -111,7 +121,7 @@ function UniverseHome() {
                 transition={{ delay: 1.4, duration: 0.6, type: "spring" }}
                 whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(96,165,250,0.5)" }}
                 whileTap={{ scale: 0.97 }}
-                onClick={() => setEnteredUniverse(true)}
+                onClick={() => handleEnter()}
                 style={{
                   padding: "16px 48px",
                   background: "linear-gradient(135deg, #1d4ed8, #4f46e5)",
