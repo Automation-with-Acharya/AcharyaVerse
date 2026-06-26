@@ -1,7 +1,7 @@
 import { useFrame } from "@react-three/fiber";
 import { useRef, useState } from "react";
 import * as THREE from "three";
-import { Text } from "@react-three/drei";
+import { Text, Sparkles } from "@react-three/drei";
 
 type PlanetProps = {
   position: [number, number, number];
@@ -25,12 +25,16 @@ export default function Planet({
   selectedPlanet,
   setSelectedPlanet,
 }: PlanetProps) {
-  const meshRef   = useRef<THREE.Mesh>(null);
-  const glowRef   = useRef<THREE.Mesh>(null);
-  const groupRef  = useRef<THREE.Group>(null);
-  const labelRef  = useRef<THREE.Group>(null);
+  const meshRef        = useRef<THREE.Mesh>(null);
+  const glowRef        = useRef<THREE.Mesh>(null);
+  const groupRef       = useRef<THREE.Group>(null);
+  const labelRef       = useRef<THREE.Group>(null);
+  const beaconRingRef  = useRef<THREE.Mesh>(null);
+  const beaconRing2Ref = useRef<THREE.Mesh>(null);
 
   const [hovered, setHovered] = useState(false);
+  // Beacon ring phase offset so the two rings are staggered
+  const beaconPhase = useRef(Math.random() * Math.PI * 2);
   const isSelected = selectedPlanet === name;
 
   const effectiveGlow = glowColor ?? color;
@@ -60,8 +64,34 @@ export default function Planet({
     // Glow pulse
     if (glowRef.current) {
       const glowMat = glowRef.current.material as THREE.MeshBasicMaterial;
-      glowMat.opacity = (isSelected ? 0.22 : hovered ? 0.14 : 0.08)
-        + Math.sin(t * 1.5) * 0.03;
+      glowMat.opacity = (isSelected ? 0.30 : hovered ? 0.14 : 0.08)
+        + Math.sin(t * 1.5) * 0.04;
+    }
+
+    // Animated beacon rings that expand outward when selected
+    if (isSelected) {
+      const speed = 1.2;
+      const maxScale = 2.8;
+
+      if (beaconRingRef.current) {
+        const phase1 = ((t * speed + beaconPhase.current) % 1);
+        const s1 = 1 + phase1 * (maxScale - 1);
+        beaconRingRef.current.scale.setScalar(s1);
+        (beaconRingRef.current.material as THREE.MeshBasicMaterial).opacity =
+          (1 - phase1) * 0.45;
+      }
+      if (beaconRing2Ref.current) {
+        const phase2 = ((t * speed + beaconPhase.current + 0.5) % 1);
+        const s2 = 1 + phase2 * (maxScale - 1);
+        beaconRing2Ref.current.scale.setScalar(s2);
+        (beaconRing2Ref.current.material as THREE.MeshBasicMaterial).opacity =
+          (1 - phase2) * 0.45;
+      }
+    } else {
+      if (beaconRingRef.current)
+        (beaconRingRef.current.material as THREE.MeshBasicMaterial).opacity = 0;
+      if (beaconRing2Ref.current)
+        (beaconRing2Ref.current.material as THREE.MeshBasicMaterial).opacity = 0;
     }
 
     // Billboard labels toward camera
@@ -90,9 +120,43 @@ export default function Planet({
         <meshBasicMaterial
           color={effectiveGlow}
           transparent
-          opacity={isSelected ? 0.6 : hovered ? 0.35 : 0.18}
+          opacity={isSelected ? 0.75 : hovered ? 0.35 : 0.18}
         />
       </mesh>
+
+      {/* Beacon rings — expand outward when selected */}
+      <mesh ref={beaconRingRef} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[size * 1.55, 0.018, 8, 64]} />
+        <meshBasicMaterial
+          color={effectiveGlow}
+          transparent
+          opacity={0}
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </mesh>
+      <mesh ref={beaconRing2Ref} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[size * 1.55, 0.018, 8, 64]} />
+        <meshBasicMaterial
+          color={effectiveGlow}
+          transparent
+          opacity={0}
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </mesh>
+
+      {/* Sparkles when selected */}
+      {isSelected && (
+        <Sparkles
+          count={24}
+          scale={size * 4}
+          size={1.2}
+          speed={0.4}
+          color={effectiveGlow}
+          opacity={0.7}
+        />
+      )}
 
       {/* Planet body */}
       <mesh

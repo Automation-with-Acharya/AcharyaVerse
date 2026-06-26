@@ -1,9 +1,11 @@
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { Stars, OrbitControls } from "@react-three/drei";
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import * as THREE from "three";
+import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import BlackHole from "./BlackHole";
 import Planet from "./Planet";
+import CameraController from "./CameraController";
 import { planets } from "../data/planets";
 
 type SpaceSceneProps = {
@@ -11,7 +13,7 @@ type SpaceSceneProps = {
   setSelectedPlanet: (planet: string | null) => void;
 };
 
-// Nebula-style particle cloud
+// ─── Nebula-style particle cloud ─────────────────────────────────────────────
 function NebulaParticles() {
   const pointsRef = useRef<THREE.Points>(null);
   const count = 600;
@@ -66,42 +68,23 @@ function NebulaParticles() {
   );
 }
 
-// Smooth camera intro animation
-function CameraIntro() {
-  const { camera } = useThree();
-  const started = useRef(false);
-  const elapsed = useRef(0);
-  const startPos = new THREE.Vector3(0, 0, 22);
-  const endPos   = new THREE.Vector3(0, 0, 10);
-
-  useEffect(() => {
-    camera.position.copy(startPos);
-    started.current = true;
-  }, []);
-
-  useFrame((_, delta) => {
-    if (!started.current) return;
-    if (elapsed.current < 1) {
-      elapsed.current += delta * 0.5; // 2 second intro
-      const t = Math.min(elapsed.current, 1);
-      const ease = 1 - Math.pow(1 - t, 3); // cubic ease-out
-      camera.position.lerpVectors(startPos, endPos, ease);
-    }
-  });
-
-  return null;
-}
-
+// ─── Scene content (inside Canvas) ──────────────────────────────────────────
 function SceneContent({
   selectedPlanet,
   setSelectedPlanet,
-}: SpaceSceneProps) {
+  controlsRef,
+}: SpaceSceneProps & { controlsRef: React.RefObject<OrbitControlsImpl | null> }) {
   return (
     <>
       <ambientLight intensity={0.3} />
       <directionalLight position={[10, 10, 5]} intensity={0.6} color="#ffffff" />
 
-      <CameraIntro />
+      {/* Milestone 4: smooth camera controller */}
+      <CameraController
+        selectedPlanet={selectedPlanet}
+        controlsRef={controlsRef}
+      />
+
       <NebulaParticles />
 
       {/* Dense starfield */}
@@ -135,10 +118,14 @@ function SceneContent({
   );
 }
 
+// ─── SpaceScene ───────────────────────────────────────────────────────────────
 export default function SpaceScene({
   selectedPlanet,
   setSelectedPlanet,
 }: SpaceSceneProps) {
+  // Shared ref so CameraController can pause / resume OrbitControls
+  const controlsRef = useRef<OrbitControlsImpl | null>(null);
+
   return (
     <Canvas
       camera={{ position: [0, 0, 22], fov: 60 }}
@@ -148,11 +135,13 @@ export default function SpaceScene({
       <SceneContent
         selectedPlanet={selectedPlanet}
         setSelectedPlanet={setSelectedPlanet}
+        controlsRef={controlsRef}
       />
       <OrbitControls
+        ref={controlsRef}
         enableZoom
         enablePan={false}
-        minDistance={5}
+        minDistance={2.5}
         maxDistance={25}
         autoRotate
         autoRotateSpeed={0.3}
