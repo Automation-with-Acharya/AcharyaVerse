@@ -1,7 +1,7 @@
 import SpaceScene from "./components/SpaceScene";
 import { useState } from "react";
 import PlanetInfo from "./components/PlanetInfo";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 import Projects    from "./pages/Projects";
@@ -12,6 +12,31 @@ import PhysicsLab  from "./pages/PhysicsLab";
 import Resume      from "./pages/Resume";
 import Contact     from "./pages/Contact";
 
+// ─── Page transition wrapper ──────────────────────────────────────────────────
+// Each planet page warps in from a slight scale + opacity shift
+const pageVariants = {
+  initial: { opacity: 0, scale: 0.97, y: 12 },
+  animate: { opacity: 1, scale: 1,    y: 0  },
+  exit:    { opacity: 0, scale: 1.02, y: -8 },
+};
+const pageTransition = { duration: 0.45, ease: "easeOut" as const };
+
+function PageWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <motion.div
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      transition={pageTransition}
+      style={{ width: "100%", height: "100%" }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// ─── Universe home ────────────────────────────────────────────────────────────
 function UniverseHome() {
   const [selectedPlanet, setSelectedPlanet] = useState<string | null>(null);
 
@@ -163,19 +188,28 @@ function UniverseHome() {
   );
 }
 
-function App() {
+// ─── Animated routes ──────────────────────────────────────────────────────────
+function AnimatedRoutes() {
+  const location = useLocation();
+
   return (
-    <Routes>
-      <Route path="/"             element={<UniverseHome />} />
-      <Route path="/projects"     element={<Projects />} />
-      <Route path="/skills"       element={<Skills />} />
-      <Route path="/experience"   element={<Experience />} />
-      <Route path="/ai-mayank"    element={<AiMayank />} />
-      <Route path="/physics-lab"  element={<PhysicsLab />} />
-      <Route path="/resume"       element={<Resume />} />
-      <Route path="/contact"      element={<Contact />} />
-    </Routes>
+    <AnimatePresence mode="wait" initial={false}>
+      <Routes location={location} key={location.pathname}>
+        <Route path="/"            element={<UniverseHome />} />
+        <Route path="/projects"    element={<PageWrapper><Projects /></PageWrapper>} />
+        <Route path="/skills"      element={<PageWrapper><Skills /></PageWrapper>} />
+        <Route path="/experience"  element={<PageWrapper><Experience /></PageWrapper>} />
+        <Route path="/ai-mayank"   element={<PageWrapper><AiMayank /></PageWrapper>} />
+        <Route path="/physics-lab" element={<PageWrapper><PhysicsLab /></PageWrapper>} />
+        <Route path="/resume"      element={<PageWrapper><Resume /></PageWrapper>} />
+        <Route path="/contact"     element={<PageWrapper><Contact /></PageWrapper>} />
+      </Routes>
+    </AnimatePresence>
   );
+}
+
+function App() {
+  return <AnimatedRoutes />;
 }
 
 export default App;
