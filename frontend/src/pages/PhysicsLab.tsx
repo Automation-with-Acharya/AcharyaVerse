@@ -6,6 +6,8 @@ import {
   BlackHoleSim,
   WaveInterferenceSim,
   NBodySim,
+  SpacetimeCurvatureSim,
+  PendulumSim,
 } from "../components/PhysicsSimulations";
 
 type Experiment = {
@@ -38,10 +40,28 @@ const experiments: Experiment[] = [
     component: <BlackHoleSim />,
   },
   {
+    id: "spacetime",
+    label: "Spacetime Curvature",
+    emoji: "🌀",
+    color: "#60a5fa",
+    tagline: "Gravity Wells — Not Ripples",
+    branch: "General Relativity",
+    component: <SpacetimeCurvatureSim />,
+  },
+  {
+    id: "pendulum",
+    label: "Pendulum",
+    emoji: "🕰️",
+    color: "#34d399",
+    tagline: "Simple & Double Pendulum — RK4",
+    branch: "Classical Mechanics",
+    component: <PendulumSim />,
+  },
+  {
     id: "wave",
     label: "Wave Interference",
     emoji: "〰️",
-    color: "#60a5fa",
+    color: "#a78bfa",
     tagline: "Two-Source Superposition",
     branch: "Wave Physics",
     component: <WaveInterferenceSim />,
@@ -50,12 +70,13 @@ const experiments: Experiment[] = [
     id: "nbody",
     label: "N-Body Chaos",
     emoji: "🌌",
-    color: "#a78bfa",
+    color: "#f97316",
     tagline: "Gravitational Many-Body Problem",
     branch: "Chaos Theory",
     component: <NBodySim />,
   },
 ];
+
 
 export default function PhysicsLab() {
   const [active, setActive] = useState("solar");

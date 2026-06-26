@@ -673,6 +673,567 @@ export function NBodySim() {
 }
 
 // ─────────────────────────────────────────────────────────
+// SPACETIME CURVATURE — gravity well deformable mesh
+// Physics: Y displacement ∝ -mass / sqrt(r² + ε)
+// NOT ripples (those = gravitational waves); this = geodesic curvature
+// ─────────────────────────────────────────────────────────
+
+const GRID_SIZE = 24;   // world-space size
+const GRID_SEGS = 70;   // vertex resolution
+
+function colorFromDepth(depth: number, maxDepth: number): THREE.Color {
+  // 0 = flat (cyan-blue) → 1 = deep well (red-violet)
+  const t = Math.min(depth / maxDepth, 1);
+  const c = new THREE.Color();
+  // Hue: 200° (blue) → 0° (red), through violet at midpoint
+  c.setHSL(0.58 - t * 0.58, 1, 0.5 - t * 0.15);
+  return c;
+}
+
+interface WellMass { x: number; z: number; mass: number; color: string; drift: number; }
+
+function SpacetimeScene({
+  wells, maxDepth, showWireframe,
+}: { wells: WellMass[]; maxDepth: number; showWireframe: boolean }) {
+  const meshRef  = useRef<THREE.Mesh>(null);
+  const wireRef  = useRef<THREE.Mesh>(null);
+  const timeRef  = useRef(0);
+
+  const geometry = useMemo(() => {
+    return new THREE.PlaneGeometry(GRID_SIZE, GRID_SIZE, GRID_SEGS, GRID_SEGS);
+  }, []);
+
+  // Pre-alloc color buffer
+  const colorBuffer = useMemo(() => {
+    const n = (GRID_SEGS + 1) * (GRID_SEGS + 1);
+    return new Float32Array(n * 3);
+  }, []);
+
+  useFrame((_, delta) => {
+    timeRef.current += delta * 0.25;
+    const t = timeRef.current;
+    const pos = geometry.attributes.position as THREE.BufferAttribute;
+    const count = pos.count;
+
+    let globalMax = 0;
+
+    for (let i = 0; i < count; i++) {
+      const x = pos.getX(i);
+      const z = pos.getZ(i); // PlaneGeometry is XY, rotated
+
+      let totalDepth = 0;
+      for (const w of wells) {
+        // Gentle sinusoidal drift of mass position
+        const wx = w.x + Math.sin(t * w.drift) * 1.5;
+        const wz = w.z + Math.cos(t * w.drift * 0.7) * 1.5;
+        const r2 = (x - wx) ** 2 + (z - wz) ** 2;
+        totalDepth += (w.mass / 100) * 4 / Math.sqrt(r2 + 0.5);
+      }
+      totalDepth = Math.min(totalDepth, maxDepth);
+      if (totalDepth > globalMax) globalMax = totalDepth;
+      pos.setY(i, -totalDepth);
+
+      const c = colorFromDepth(totalDepth, maxDepth);
+      colorBuffer[i * 3]     = c.r;
+      colorBuffer[i * 3 + 1] = c.g;
+      colorBuffer[i * 3 + 2] = c.b;
+    }
+
+    pos.needsUpdate = true;
+    geometry.computeVertexNormals();
+
+    // Apply colors
+    if (!geometry.attributes.color) {
+      geometry.setAttribute('color', new THREE.BufferAttribute(colorBuffer.slice(), 3));
+    } else {
+      (geometry.attributes.color as THREE.BufferAttribute).set(colorBuffer);
+      (geometry.attributes.color as THREE.BufferAttribute).needsUpdate = true;
+    }
+
+    // Mirror geometry to wireframe
+    if (wireRef.current) {
+      wireRef.current.geometry = geometry;
+    }
+  });
+
+  return (
+    <>
+      <ambientLight intensity={0.2} />
+      <directionalLight position={[10, 14, 6]} intensity={0.8} color="#a0c8ff" />
+      <pointLight position={[0, 8, 0]} intensity={2} color="#ffffff" distance={40} />
+      <Stars radius={60} depth={30} count={2000} factor={3} saturation={0.2} fade />
+
+      {/* Solid color-mapped mesh */}
+      <mesh ref={meshRef} geometry={geometry} rotation={[-Math.PI / 2, 0, 0]}>
+        <meshStandardMaterial
+          vertexColors
+          side={THREE.DoubleSide}
+          roughness={0.3}
+          metalness={0.5}
+          transparent
+          opacity={showWireframe ? 0.55 : 0.85}
+        />
+      </mesh>
+
+      {/* Wireframe overlay */}
+      {showWireframe && (
+        <mesh ref={wireRef} geometry={geometry} rotation={[-Math.PI / 2, 0, 0]}>
+          <meshBasicMaterial
+            color="#60a5fa"
+            wireframe
+            transparent
+            opacity={0.25}
+          />
+        </mesh>
+      )}
+
+      {/* Mass spheres floating above their wells */}
+      {wells.map((w, i) => (
+        <mesh key={i} position={[w.x, 0.4 + (w.mass / 100) * 0.3, w.z]}>
+          <sphereGeometry args={[0.12 + (w.mass / 100) * 0.18, 24, 24]} />
+          <meshStandardMaterial
+            color={w.color}
+            emissive={w.color}
+            emissiveIntensity={1.2}
+            roughness={0.1}
+            metalness={0.6}
+          />
+          <pointLight color={w.color} intensity={3} distance={8} />
+        </mesh>
+      ))}
+    </>
+  );
+}
+
+export function SpacetimeCurvatureSim() {
+  const presets = [
+    {
+      id: "single",   label: "Single Mass",
+      wells: [{ x: 0, z: 0, mass: 80, color: "#60a5fa", drift: 0 }],
+    },
+    {
+      id: "binary",   label: "Binary Stars",
+      wells: [
+        { x: -4, z: 0, mass: 70, color: "#fbbf24", drift: 0.3 },
+        { x:  4, z: 0, mass: 60, color: "#f97316", drift: -0.3 },
+      ],
+    },
+    {
+      id: "triple",   label: "Triple System",
+      wells: [
+        { x: -4, z: -3, mass: 60, color: "#a78bfa", drift: 0.2 },
+        { x:  4, z: -3, mass: 55, color: "#34d399", drift: -0.25 },
+        { x:  0, z:  4, mass: 80, color: "#f43f5e", drift: 0.15 },
+      ],
+    },
+    {
+      id: "blackhole", label: "Black Hole",
+      wells: [{ x: 0, z: 0, mass: 200, color: "#6d28d9", drift: 0 }],
+    },
+  ];
+
+  const [preset, setPreset]   = useState(presets[0]);
+  const [mass, setMass]       = useState(80);
+  const [maxD, setMaxD]       = useState(8);
+  const [wire, setWire]       = useState(true);
+
+  // Scale single-mass preset by slider
+  const activeWells = preset.id === "single"
+    ? [{ ...preset.wells[0], mass }]
+    : preset.wells;
+
+  return (
+    <div>
+      <div
+        style={{
+          background: "rgba(0,0,10,0.95)",
+          border: "1px solid rgba(96,165,250,0.2)",
+          borderRadius: "16px",
+          overflow: "hidden",
+          marginBottom: "20px",
+        }}
+      >
+        <Canvas camera={{ position: [0, 18, 14], fov: 50 }} style={{ height: "500px" }}>
+          <SpacetimeScene wells={activeWells} maxDepth={maxD} showWireframe={wire} />
+          <OrbitControls enableDamping dampingFactor={0.05} minDistance={4} maxDistance={40} />
+        </Canvas>
+      </div>
+
+      <PhysicsControls>
+        {/* Preset selector */}
+        <div style={{ marginBottom: "16px" }}>
+          <div style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#94a3b8", fontSize: "0.82rem", marginBottom: "8px" }}>
+            Mass Configuration
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+            {presets.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => setPreset(p)}
+                style={{
+                  padding: "7px 16px",
+                  borderRadius: "8px",
+                  border: `1px solid ${p.id === preset.id ? "#60a5fa" : "rgba(255,255,255,0.1)"}`,
+                  background: p.id === preset.id ? "rgba(96,165,250,0.15)" : "transparent",
+                  color: p.id === preset.id ? "#60a5fa" : "#64748b",
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontSize: "0.8rem",
+                  cursor: "pointer",
+                }}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {preset.id === "single" && (
+          <SliderControl label="Mass" value={mass} min={10} max={200} step={5} unit=" M" color="#60a5fa" onChange={setMass} />
+        )}
+        <SliderControl label="Max Well Depth" value={maxD} min={2} max={18} step={0.5} unit=" units" color="#a78bfa" onChange={setMaxD} />
+
+        <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+          <LabButton color="#60a5fa" onClick={() => setWire(!wire)}>
+            {wire ? "⬡ Hide Grid" : "⬡ Show Grid"}
+          </LabButton>
+        </div>
+      </PhysicsControls>
+
+      {/* Color legend */}
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+        marginBottom: "16px",
+        padding: "12px 18px",
+        background: "rgba(2,8,20,0.7)",
+        border: "1px solid rgba(96,165,250,0.12)",
+        borderRadius: "12px",
+      }}>
+        <span style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#64748b", fontSize: "0.78rem" }}>Curvature:</span>
+        <div style={{
+          flex: 1,
+          height: "8px",
+          borderRadius: "4px",
+          background: "linear-gradient(90deg, #06b6d4, #6d28d9, #dc2626)",
+        }}/>
+        <span style={{ fontFamily: "'Orbitron', monospace", color: "#06b6d4", fontSize: "0.72rem" }}>Flat</span>
+        <span style={{ fontFamily: "'Orbitron', monospace", color: "#dc2626", fontSize: "0.72rem" }}>Deep</span>
+      </div>
+
+      <PhysicsFact color="#60a5fa">
+        🌌 Einstein's General Relativity describes gravity not as a force, but as the curvature
+        of 4-dimensional spacetime caused by mass. Massive objects create deeper wells —
+        geodesics ("straight lines" in curved spacetime) follow these wells, which we perceive as gravitational attraction.
+        Black holes create infinite-depth funnels where even light cannot escape.
+      </PhysicsFact>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// PENDULUM — RK4 integrated, single + double chaos
+// ─────────────────────────────────────────────────────────
+
+const GRAVITY_PRESETS: Record<string, number> = {
+  Earth:   9.81,
+  Moon:    1.62,
+  Mars:    3.72,
+  Jupiter: 24.79,
+  Space:   0.1,
+};
+
+function PendulumScene({
+  length, gravity, damping, angle0, paused, isDouble, length2, angle2_0,
+}: {
+  length: number; gravity: number; damping: number; angle0: number;
+  paused: boolean; isDouble: boolean; length2: number; angle2_0: number;
+}) {
+  // State: [theta1, omega1, theta2, omega2]
+  const stateRef   = useRef([angle0, 0, angle2_0, 0]);
+  const trailRef   = useRef<THREE.Vector3[]>([]);
+  const bob1Ref    = useRef<THREE.Mesh>(null);
+  const bob2Ref    = useRef<THREE.Mesh>(null);
+  const rod1Ref    = useRef<THREE.Mesh>(null);
+  const rod2Ref    = useRef<THREE.Mesh>(null);
+
+  const m1 = 1, m2 = 1;
+  const L1 = length, L2 = length2;
+
+  // Reset on simKey
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const resetRef = useRef(false);
+  if (!resetRef.current) {
+    stateRef.current = [angle0, 0, angle2_0, 0];
+    trailRef.current = [];
+    resetRef.current = true;
+  }
+
+  // RK4 derivatives for simple pendulum
+  const derivSimple = (th: number, om: number): [number, number] => [
+    om,
+    -(gravity / L1) * Math.sin(th) - damping * om,
+  ];
+
+  // RK4 derivatives for double pendulum
+  const derivDouble = (th1: number, om1: number, th2: number, om2: number) => {
+    const dth = th1 - th2;
+    const denom1 = (m1 + m2) * L1 - m2 * L1 * Math.cos(dth) * Math.cos(dth);
+    const denom2 = (L2 / L1) * denom1;
+
+    const dom1 = (
+      m2 * L1 * om1 * om1 * Math.sin(dth) * Math.cos(dth)
+      + m2 * gravity * Math.sin(th2) * Math.cos(dth)
+      + m2 * L2 * om2 * om2 * Math.sin(dth)
+      - (m1 + m2) * gravity * Math.sin(th1)
+    ) / denom1 - damping * om1;
+
+    const dom2 = (
+      -m2 * L2 * om2 * om2 * Math.sin(dth) * Math.cos(dth)
+      + (m1 + m2) * gravity * Math.sin(th1) * Math.cos(dth)
+      - (m1 + m2) * L1 * om1 * om1 * Math.sin(dth)
+      - (m1 + m2) * gravity * Math.sin(th2)
+    ) / denom2 - damping * om2;
+
+    return [om1, dom1, om2, dom2];
+  };
+
+  useFrame((_, delta) => {
+    if (paused) return;
+    const dt = Math.min(delta, 0.02); // cap timestep
+    const STEPS = 8;
+    const h = dt / STEPS;
+
+    for (let s = 0; s < STEPS; s++) {
+      const [th1, om1, th2, om2] = stateRef.current;
+
+      if (isDouble) {
+        // RK4 for double pendulum
+        const k1 = derivDouble(th1, om1, th2, om2);
+        const k2 = derivDouble(th1+h/2*k1[0], om1+h/2*k1[1], th2+h/2*k1[2], om2+h/2*k1[3]);
+        const k3 = derivDouble(th1+h/2*k2[0], om1+h/2*k2[1], th2+h/2*k2[2], om2+h/2*k2[3]);
+        const k4 = derivDouble(th1+h*k3[0],   om1+h*k3[1],   th2+h*k3[2],   om2+h*k3[3]);
+        stateRef.current = [
+          th1 + (h/6)*(k1[0]+2*k2[0]+2*k3[0]+k4[0]),
+          om1 + (h/6)*(k1[1]+2*k2[1]+2*k3[1]+k4[1]),
+          th2 + (h/6)*(k1[2]+2*k2[2]+2*k3[2]+k4[2]),
+          om2 + (h/6)*(k1[3]+2*k2[3]+2*k3[3]+k4[3]),
+        ];
+      } else {
+        // RK4 for simple pendulum
+        const [d1a, d1b] = derivSimple(th1, om1);
+        const [d2a, d2b] = derivSimple(th1+h/2*d1a, om1+h/2*d1b);
+        const [d3a, d3b] = derivSimple(th1+h/2*d2a, om1+h/2*d2b);
+        const [d4a, d4b] = derivSimple(th1+h*d3a,   om1+h*d3b);
+        stateRef.current[0] = th1 + (h/6)*(d1a+2*d2a+2*d3a+d4a);
+        stateRef.current[1] = om1 + (h/6)*(d1b+2*d2b+2*d3b+d4b);
+      }
+    }
+
+    const [th1, , th2] = stateRef.current;
+
+    // Pivot at origin, Y pointing down
+    const x1 =  L1 * Math.sin(th1) * 3;
+    const y1 = -L1 * Math.cos(th1) * 3;
+    const x2 = x1 + L2 * Math.sin(th2) * 3;
+    const y2 = y1 - L2 * Math.cos(th2) * 3;
+
+    // Update bob1
+    if (bob1Ref.current) bob1Ref.current.position.set(x1, y1, 0);
+    // Update rod1 (scale+rotate a cylinder)
+    if (rod1Ref.current) {
+      rod1Ref.current.position.set(x1/2, y1/2, 0);
+      rod1Ref.current.scale.y = Math.sqrt(x1*x1 + y1*y1) / 3;
+      rod1Ref.current.rotation.z = -Math.atan2(x1, -y1);
+    }
+
+    if (isDouble) {
+      if (bob2Ref.current) bob2Ref.current.position.set(x2, y2, 0);
+      if (rod2Ref.current) {
+        const dx = x2-x1, dy = y2-y1;
+        rod2Ref.current.position.set((x1+x2)/2, (y1+y2)/2, 0);
+        rod2Ref.current.scale.y = Math.sqrt(dx*dx+dy*dy)/3;
+        rod2Ref.current.rotation.z = -Math.atan2(dx, -dy);
+      }
+
+      // Trail for bob2
+      trailRef.current.push(new THREE.Vector3(x2, y2, 0));
+      if (trailRef.current.length > 200) trailRef.current.shift();
+    } else {
+      // Trail for simple bob
+      trailRef.current.push(new THREE.Vector3(x1, y1, 0));
+      if (trailRef.current.length > 150) trailRef.current.shift();
+    }
+  });
+
+  return (
+    <>
+      <ambientLight intensity={0.4} />
+      <directionalLight position={[5, 8, 5]} intensity={1} color="#a0c8ff" />
+      <Stars radius={40} depth={20} count={1500} factor={3} fade />
+
+      {/* Pivot point */}
+      <mesh position={[0, 0, 0]}>
+        <sphereGeometry args={[0.08, 16, 16]} />
+        <meshStandardMaterial color="#94a3b8" emissive="#94a3b8" emissiveIntensity={0.5} />
+      </mesh>
+
+      {/* Rod 1 */}
+      <mesh ref={rod1Ref} position={[0, -1.5, 0]}>
+        <cylinderGeometry args={[0.03, 0.03, 3, 8]} />
+        <meshStandardMaterial color="#60a5fa" emissive="#1d4ed8" emissiveIntensity={0.3} />
+      </mesh>
+
+      {/* Bob 1 */}
+      <mesh ref={bob1Ref} position={[0, -3, 0]}>
+        <sphereGeometry args={[0.22, 32, 32]} />
+        <meshStandardMaterial color="#60a5fa" emissive="#3b82f6" emissiveIntensity={0.8} roughness={0.2} metalness={0.6} />
+        <pointLight color="#60a5fa" intensity={2} distance={5} />
+      </mesh>
+
+      {isDouble && (
+        <>
+          {/* Rod 2 */}
+          <mesh ref={rod2Ref}>
+            <cylinderGeometry args={[0.03, 0.03, 3, 8]} />
+            <meshStandardMaterial color="#f43f5e" emissive="#be123c" emissiveIntensity={0.3} />
+          </mesh>
+          {/* Bob 2 */}
+          <mesh ref={bob2Ref}>
+            <sphereGeometry args={[0.22, 32, 32]} />
+            <meshStandardMaterial color="#f43f5e" emissive="#f43f5e" emissiveIntensity={0.8} roughness={0.2} metalness={0.6} />
+            <pointLight color="#f43f5e" intensity={2} distance={5} />
+          </mesh>
+        </>
+      )}
+    </>
+  );
+}
+
+export function PendulumSim() {
+  const [length,  setLength]  = useState(1.0);
+  const [gravKey, setGravKey] = useState("Earth");
+  const [damping, setDamping] = useState(0.05);
+  const [angle0,  setAngle0]  = useState(45);
+  const [isDouble, setDouble] = useState(false);
+  const [paused,  setPaused]  = useState(false);
+  const [simKey,  setSimKey]  = useState(0);
+
+  const g = GRAVITY_PRESETS[gravKey];
+  const period = 2 * Math.PI * Math.sqrt(length / g);
+  const angle0Rad = (angle0 * Math.PI) / 180;
+
+  return (
+    <div>
+      <div
+        style={{
+          background: "rgba(0,0,10,0.9)",
+          border: "1px solid rgba(34,211,153,0.2)",
+          borderRadius: "16px",
+          overflow: "hidden",
+          marginBottom: "20px",
+        }}
+      >
+        <Canvas key={simKey} camera={{ position: [0, -3, 14], fov: 50 }} style={{ height: "480px" }}>
+          <PendulumScene
+            length={length} gravity={g} damping={damping}
+            angle0={angle0Rad} paused={paused}
+            isDouble={isDouble} length2={length * 0.8} angle2_0={angle0Rad * 0.9}
+          />
+          <OrbitControls enableDamping enableZoom minDistance={5} maxDistance={25} />
+        </Canvas>
+      </div>
+
+      {/* Live stats */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+        gap: "12px",
+        marginBottom: "16px",
+      }}>
+        {[
+          { label: "Period (T)",    value: `${period.toFixed(2)} s`,   color: "#34d399" },
+          { label: "Gravity (g)",   value: `${g.toFixed(2)} m/s²`,     color: "#fbbf24" },
+          { label: "Length (L)",    value: `${length.toFixed(2)} m`,   color: "#60a5fa" },
+          { label: "Damping (b)",   value: `${damping.toFixed(3)}`,    color: "#a78bfa" },
+        ].map((stat) => (
+          <div
+            key={stat.label}
+            style={{
+              background: `${stat.color}0c`,
+              border: `1px solid ${stat.color}25`,
+              borderRadius: "12px",
+              padding: "14px",
+              textAlign: "center",
+            }}
+          >
+            <div style={{ fontFamily: "'Orbitron', monospace", fontSize: "1rem", color: stat.color, marginBottom: "4px", fontWeight: 700 }}>
+              {stat.value}
+            </div>
+            <div style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#64748b", fontSize: "0.75rem" }}>
+              {stat.label}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <PhysicsControls>
+        {/* Gravity preset */}
+        <div style={{ marginBottom: "14px" }}>
+          <div style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#94a3b8", fontSize: "0.82rem", marginBottom: "8px" }}>Gravity World</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+            {Object.keys(GRAVITY_PRESETS).map((gp) => (
+              <button
+                key={gp}
+                onClick={() => { setGravKey(gp); setSimKey(k => k + 1); }}
+                style={{
+                  padding: "6px 14px",
+                  borderRadius: "8px",
+                  border: `1px solid ${gp === gravKey ? "#34d399" : "rgba(255,255,255,0.1)"}`,
+                  background: gp === gravKey ? "rgba(52,211,153,0.15)" : "transparent",
+                  color: gp === gravKey ? "#34d399" : "#64748b",
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontSize: "0.78rem",
+                  cursor: "pointer",
+                }}
+              >
+                {gp}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <SliderControl label="Pendulum Length" value={length} min={0.3} max={3.0} step={0.1} unit=" m" color="#60a5fa"
+          onChange={(v) => { setLength(v); setSimKey(k => k + 1); }} />
+        <SliderControl label="Release Angle" value={angle0} min={5} max={170} step={5} unit="°" color="#fbbf24"
+          onChange={(v) => { setAngle0(v); setSimKey(k => k + 1); }} />
+        <SliderControl label="Air Damping" value={damping} min={0} max={0.5} step={0.01} unit="" color="#a78bfa" onChange={setDamping} />
+
+        <div style={{ display: "flex", gap: "10px", marginTop: "12px", flexWrap: "wrap" }}>
+          <LabButton color="#34d399" onClick={() => setPaused(!paused)}>
+            {paused ? "▶ Resume" : "⏸ Pause"}
+          </LabButton>
+          <LabButton color="#64748b" onClick={() => setSimKey(k => k + 1)}>↺ Reset</LabButton>
+          <LabButton
+            color={isDouble ? "#f43f5e" : "#a78bfa"}
+            onClick={() => { setDouble(!isDouble); setSimKey(k => k + 1); }}
+          >
+            {isDouble ? "🔴 Double (Chaotic)" : "🔵 Single"}
+          </LabButton>
+        </div>
+      </PhysicsControls>
+
+      <PhysicsFact color="#34d399">
+        🕰️ The period of a simple pendulum T = 2π√(L/g) depends only on length and gravity — not mass!
+        Galileo discovered this in 1602. The double pendulum is completely deterministic yet exhibits
+        true chaos — tiny changes in initial angle lead to wildly different long-term trajectories.
+        Switch to Double mode and observe the sensitivity to initial conditions.
+      </PhysicsFact>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
 // SHARED UI PRIMITIVES
 // ─────────────────────────────────────────────────────────
 

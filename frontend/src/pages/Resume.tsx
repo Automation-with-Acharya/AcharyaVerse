@@ -86,11 +86,62 @@ export default function Resume() {
           <p style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#94a3b8", fontSize: "1rem", marginBottom: "4px" }}>
             Senior Software Engineer · Bank of America Continuum India
           </p>
-          <p style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#64748b", fontSize: "0.875rem" }}>
+          <p style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#64748b", fontSize: "0.875rem", marginBottom: "20px" }}>
             🚀 6+ years · Automation Expert · AI Enthusiast · Physics Lover
           </p>
+
+          {/* CTA buttons */}
+          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+            <motion.a
+              href="/resume.pdf"
+              download="Mayank_Acharya_Resume.pdf"
+              whileHover={{ scale: 1.04, boxShadow: "0 0 28px rgba(251,191,36,0.5)" }}
+              whileTap={{ scale: 0.97 }}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "11px 24px",
+                background: "linear-gradient(135deg, #d97706, #f97316)",
+                color: "white",
+                borderRadius: "50px",
+                textDecoration: "none",
+                fontFamily: "'Orbitron', monospace",
+                fontSize: "0.78rem",
+                fontWeight: 700,
+                letterSpacing: "0.1em",
+                boxShadow: "0 0 16px rgba(251,191,36,0.3)",
+              }}
+            >
+              ⬇ DOWNLOAD RESUME
+            </motion.a>
+            <motion.a
+              href="https://www.linkedin.com/in/mayank-acharya/"
+              target="_blank"
+              rel="noopener noreferrer"
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.97 }}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "11px 20px",
+                background: "rgba(251,191,36,0.08)",
+                color: "#fbbf24",
+                border: "1px solid rgba(251,191,36,0.3)",
+                borderRadius: "50px",
+                textDecoration: "none",
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontSize: "0.82rem",
+                fontWeight: 600,
+              }}
+            >
+              🔗 LinkedIn
+            </motion.a>
+          </div>
         </div>
       </motion.div>
+
 
       {/* ── ACHIEVEMENTS ──────────────────────────────── */}
       <SectionTitle color="#fbbf24">✦ Key Achievements</SectionTitle>
