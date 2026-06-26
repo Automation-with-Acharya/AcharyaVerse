@@ -103,9 +103,7 @@ export default function CameraController({ selectedPlanet, controlsRef }: Props)
 
       const planetVec = new THREE.Vector3(...ppos);
 
-      // Camera sits in front of the planet (toward the viewer)
-      const dir = new THREE.Vector3(0, 0, 1); // default: come from +Z side
-      // Actually position the camera offset from the planet in the scene's
+      // Position the camera offset from the planet in the scene's
       // XZ plane so it doesn't clip the black hole at origin.
       const fromOrigin = planetVec.clone().normalize();
       const offset = fromOrigin.multiplyScalar(ZOOM_OFFSET);
@@ -132,7 +130,7 @@ export default function CameraController({ selectedPlanet, controlsRef }: Props)
   }, [selectedPlanet]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Animation loop ─────────────────────────────────────────────────────────
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     const phase = phaseRef.current;
     if (phase === "idle") return;
 
