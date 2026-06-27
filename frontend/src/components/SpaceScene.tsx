@@ -3,6 +3,7 @@ import { Stars, OrbitControls } from "@react-three/drei";
 import { useRef } from "react";
 import * as THREE from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
+import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import BlackHole from "./BlackHole";
 import Planet from "./Planet";
 import CameraController from "./CameraController";
@@ -129,7 +130,7 @@ export default function SpaceScene({
   return (
     <Canvas
       camera={{ position: [0, 0, 22], fov: 60 }}
-      gl={{ antialias: true, alpha: false }}
+      gl={{ antialias: true, alpha: false, toneMappingExposure: 1.2 }}
       style={{ background: "#000005" }}
     >
       <SceneContent
@@ -148,6 +149,15 @@ export default function SpaceScene({
         enableDamping
         dampingFactor={0.05}
       />
+      {/* Bloom post-processing — subtle volumetric glow on planets & BH */}
+      <EffectComposer>
+        <Bloom
+          luminanceThreshold={0.55}
+          luminanceSmoothing={0.3}
+          intensity={1.2}
+          radius={0.8}
+        />
+      </EffectComposer>
     </Canvas>
   );
 }
