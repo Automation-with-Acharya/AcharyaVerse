@@ -1,197 +1,231 @@
-/**
- * CameraController.tsx
- *
- * Milestone 4 — Camera System
- * ----------------------------
- * Drives two phases of camera motion inside the R3F Canvas:
- *
- * 1. INTRO  — gentle pull-in from Z=22 → Z=10 on mount (2 s, cubic ease-out)
- * 2. ZOOM   — smooth fly-to when a planet is selected, ease-back on deselect
- *
- * OrbitControls is disabled during a zoom transition so the two systems don't
- * fight each other.  Once the camera arrives at the target, controls re-enable
- * so the user can still orbit around the selected planet.
- */
-
 import { useFrame, useThree } from "@react-three/fiber";
 import { useRef, useEffect } from "react";
 import * as THREE from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
+import { galaxies } from "../data/galaxies";
 
-// ─── Planet position registry ────────────────────────────────────────────────
-// Keep in sync with data/planets.ts positions.
-const PLANET_POSITIONS: Record<string, [number, number, number]> = {
-  Resume:        [0,    3.5,  0  ],
-  Experience:    [-5,   1.5,  -2 ],
-  Projects:      [5,    1.5,  -2 ],
-  Skills:        [-5,  -2,    -1 ],
-  "AI Mayank":   [5,   -2,    -1 ],
-  "Physics Lab": [-3,  -4,    -3 ],
-  Contact:       [3,   -4,    -3 ],
-};
+// Helper to compute galaxy world position at time t
+export function getGalaxyWorldPos(galaxyId: string, t: number): THREE.Vector3 {
+  const g = galaxies.find((x) => x.id === galaxyId);
+  if (!g) return new THREE.Vector3(0, 0, 0);
+  const angle = t * g.orbitSpeed * 3.5;
+  const x = Math.cos(angle) * g.orbitRadius;
+  const z = Math.sin(angle) * g.orbitRadius;
+  const y = Math.sin(angle) * g.orbitRadius * Math.sin(g.inclination);
+  return new THREE.Vector3(x, y, z);
+}
 
-// How far in front of the planet to position the camera (world units)
-const ZOOM_OFFSET = 3.2;
+// Helper to compute sub-planet world position at time t
+export function getPlanetWorldPos(
+  galaxyId: string,
+  planetName: string,
+  t: number
+): THREE.Vector3 {
+  const g = galaxies.find((x) => x.id === galaxyId);
+  if (!g) return new THREE.Vector3(0, 0, 0);
+  const gpos = getGalaxyWorldPos(galaxyId, t);
 
-// Overview position (matches the default camera & CameraIntro end pos)
-const OVERVIEW_POSITION = new THREE.Vector3(0, 0, 10);
+  const p = g.planets.find((x) => x.name === planetName);
+  if (!p) return gpos;
+
+  const angle = t * p.orbitSpeed * 12;
+  const px = Math.cos(angle) * p.orbitRadius;
+  const pz = Math.sin(angle) * p.orbitRadius;
+  return gpos.clone().add(new THREE.Vector3(px, 0, pz));
+}
+
+// How close to zoom in
+const GALAXY_ZOOM_OFFSET = 5.5;
+const PLANET_ZOOM_OFFSET = 1.8;
+
+// Overview position (default universe overview)
+const OVERVIEW_POSITION = new THREE.Vector3(0, 5, 24);
 const OVERVIEW_TARGET   = new THREE.Vector3(0, 0, 0);
 
-// Animation durations in seconds
-const INTRO_DURATION  = 2.0;   // pull-in on first mount
-const ZOOM_DURATION   = 1.6;   // fly-to planet
-const RETURN_DURATION = 1.4;   // return to overview
+// Transition durations in seconds
+const INTRO_DURATION  = 2.2;
+const ZOOM_DURATION   = 1.5;
+const RETURN_DURATION = 1.3;
 
-// Easing helpers
-function easeInOutCubic(t: number) {
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-}
-function easeOutCubic(t: number) {
-  return 1 - Math.pow(1 - t, 3);
-}
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 type Phase = "intro" | "zoom-in" | "zoom-out" | "idle";
 
-type Props = {
-  selectedPlanet: string | null;
-  /** Ref forwarded from SpaceScene so we can pause / resume auto-rotate */
+type CameraControllerProps = {
+  selectedGalaxyId: string | null;
+  selectedPlanetName: string | null;
   controlsRef: React.RefObject<OrbitControlsImpl | null>;
 };
 
-export default function CameraController({ selectedPlanet, controlsRef }: Props) {
+export default function CameraController({
+  selectedGalaxyId,
+  selectedPlanetName,
+  controlsRef,
+}: CameraControllerProps) {
   const { camera } = useThree();
 
-  const phaseRef     = useRef<Phase>("intro");
-  const elapsed      = useRef(0);
-  const prevPlanet   = useRef<string | null>(null);
+  const phaseRef = useRef<Phase>("intro");
+  const elapsed = useRef(0);
+  const prevGalaxy = useRef<string | null>(null);
+  const prevPlanet = useRef<string | null>(null);
 
-  // Snapshot of where the camera was when the animation began
-  const startPos     = useRef(new THREE.Vector3());
-  const startTarget  = useRef(new THREE.Vector3());
+  // Animation starting snapshots
+  const startPos = useRef(new THREE.Vector3());
+  const startTarget = useRef(new THREE.Vector3());
 
-  // Destination for current animation
-  const endPos       = useRef(new THREE.Vector3());
-  const endTarget    = useRef(new THREE.Vector3());
+  // Real-time tracking reference for previous frame
+  const prevTrackingTarget = useRef(new THREE.Vector3(0, 0, 0));
 
-  // ── Init intro ──────────────────────────────────────────────────────────────
+  // Initialize camera overview on mount (intro phase)
   useEffect(() => {
-    camera.position.set(0, 0, 22);
-    startPos.current.set(0, 0, 22);
-    endPos.current.copy(OVERVIEW_POSITION);
-    startTarget.current.copy(OVERVIEW_TARGET);
-    endTarget.current.copy(OVERVIEW_TARGET);
+    camera.position.set(0, 15, 35);
+    startPos.current.set(0, 15, 35);
     elapsed.current = 0;
     phaseRef.current = "intro";
 
-    // Disable controls during intro
-    if (controlsRef.current) controlsRef.current.enabled = false;
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    if (controlsRef.current) {
+      controlsRef.current.enabled = false;
+    }
+  }, [camera, controlsRef]);
 
-  // ── React to planet selection changes ──────────────────────────────────────
+  // Handle selection updates
   useEffect(() => {
-    if (selectedPlanet === prevPlanet.current) return;
-    prevPlanet.current = selectedPlanet;
+    const isGalaxyChanged = selectedGalaxyId !== prevGalaxy.current;
+    const isPlanetChanged = selectedPlanetName !== prevPlanet.current;
 
-    // Snapshot current camera state as animation start
+    if (!isGalaxyChanged && !isPlanetChanged) return;
+
+    prevGalaxy.current = selectedGalaxyId;
+    prevPlanet.current = selectedPlanetName;
+
+    // Snapshot start configuration
     startPos.current.copy(camera.position);
+    if (controlsRef.current) {
+      startTarget.current.copy(controlsRef.current.target);
+    } else {
+      startTarget.current.copy(OVERVIEW_TARGET);
+    }
 
-    if (selectedPlanet) {
-      // ── ZOOM IN ──
-      const ppos = PLANET_POSITIONS[selectedPlanet];
-      if (!ppos) return;
+    elapsed.current = 0;
 
-      const planetVec = new THREE.Vector3(...ppos);
-
-      // Position the camera offset from the planet in the scene's
-      // XZ plane so it doesn't clip the black hole at origin.
-      const fromOrigin = planetVec.clone().normalize();
-      const offset = fromOrigin.multiplyScalar(ZOOM_OFFSET);
-      endPos.current.copy(planetVec).add(offset);
-      endTarget.current.copy(planetVec);
-
+    if (selectedGalaxyId) {
+      // Zooming to either Planet or Galaxy
       phaseRef.current = "zoom-in";
-
-      // Kill auto-rotate while zoomed
       if (controlsRef.current) {
         controlsRef.current.autoRotate = false;
         controlsRef.current.enabled = false;
       }
     } else {
-      // ── ZOOM OUT / RETURN ──
-      endPos.current.copy(OVERVIEW_POSITION);
-      endTarget.current.copy(OVERVIEW_TARGET);
+      // Returning to universe overview
       phaseRef.current = "zoom-out";
-
-      if (controlsRef.current) controlsRef.current.enabled = false;
+      if (controlsRef.current) {
+        controlsRef.current.enabled = false;
+      }
     }
+  }, [selectedGalaxyId, selectedPlanetName, camera.position, controlsRef]);
 
-    elapsed.current = 0;
-  }, [selectedPlanet]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Animation loop ─────────────────────────────────────────────────────────
-  useFrame((_, delta) => {
+  useFrame(({ clock }, delta) => {
     const phase = phaseRef.current;
-    if (phase === "idle") return;
+    const tSec = clock.getElapsedTime();
 
-    let duration: number;
-    let easeFn: (t: number) => number;
+    // ── Get the current destination coordinates at the exact frame time ──
+    let currentTargetCoords = new THREE.Vector3(0, 0, 0);
+    let cameraOffset = new THREE.Vector3(0, 0.5, 1);
 
-    switch (phase) {
-      case "intro":
+    if (selectedPlanetName && selectedGalaxyId) {
+      // Dynamic sub-planet target coordinates
+      currentTargetCoords = getPlanetWorldPos(selectedGalaxyId, selectedPlanetName, tSec);
+      cameraOffset.set(0, planetOffsetHeight(selectedPlanetName), PLANET_ZOOM_OFFSET);
+    } else if (selectedGalaxyId) {
+      // Dynamic galaxy center target coordinates
+      currentTargetCoords = getGalaxyWorldPos(selectedGalaxyId, tSec);
+      cameraOffset.set(0, 1.5, GALAXY_ZOOM_OFFSET);
+    } else {
+      currentTargetCoords.copy(OVERVIEW_TARGET);
+      cameraOffset.copy(OVERVIEW_POSITION);
+    }
+
+    // ── Transition animations ──
+    if (phase !== "idle") {
+      let duration = ZOOM_DURATION;
+      let ease = (x: number) => x;
+
+      if (phase === "intro") {
         duration = INTRO_DURATION;
-        easeFn   = easeOutCubic;
-        break;
-      case "zoom-in":
+        ease = easeOutCubic;
+        currentTargetCoords.copy(OVERVIEW_TARGET);
+        cameraOffset.copy(OVERVIEW_POSITION);
+      } else if (phase === "zoom-in") {
         duration = ZOOM_DURATION;
-        easeFn   = easeInOutCubic;
-        break;
-      case "zoom-out":
+        ease = easeInOutCubic;
+      } else {
         duration = RETURN_DURATION;
-        easeFn   = easeOutCubic;
-        break;
-      default:
-        return;
-    }
+        ease = easeOutCubic;
+        currentTargetCoords.copy(OVERVIEW_TARGET);
+        cameraOffset.copy(OVERVIEW_POSITION);
+      }
 
-    elapsed.current = Math.min(elapsed.current + delta, duration);
-    const rawT = elapsed.current / duration;
-    const t    = easeFn(rawT);
+      elapsed.current = Math.min(elapsed.current + delta, duration);
+      const rawProgress = elapsed.current / duration;
+      const progress = ease(rawProgress);
 
-    // Interpolate position
-    camera.position.lerpVectors(startPos.current, endPos.current, t);
+      // Target position for the camera at this frame (destination target + offset)
+      const frameEndPos = currentTargetCoords.clone().add(cameraOffset);
 
-    // Smoothly rotate camera to look at the target
-    const currentLookAt = new THREE.Vector3();
-    currentLookAt.lerpVectors(startTarget.current, endTarget.current, t);
-    camera.lookAt(currentLookAt);
+      // Interpolate camera position
+      camera.position.lerpVectors(startPos.current, frameEndPos, progress);
 
-    // Also update the controls' target so it doesn't snap on re-enable
-    if (controlsRef.current) {
-      (controlsRef.current as any).target.lerpVectors(
-        startTarget.current,
-        endTarget.current,
-        t
-      );
-    }
-
-    // ── Transition complete ──
-    if (rawT >= 1) {
-      phaseRef.current = "idle";
-      camera.position.copy(endPos.current);
-      camera.lookAt(endTarget.current);
+      // Interpolate looking target
+      const frameLookAt = new THREE.Vector3();
+      frameLookAt.lerpVectors(startTarget.current, currentTargetCoords, progress);
+      camera.lookAt(frameLookAt);
 
       if (controlsRef.current) {
-        (controlsRef.current as any).target.copy(endTarget.current);
-        controlsRef.current.enabled = true;
-
-        // Restore auto-rotate only when back at overview
-        if (!selectedPlanet) {
-          controlsRef.current.autoRotate = true;
-        }
+        controlsRef.current.target.copy(frameLookAt);
       }
+
+      // Check if finished
+      if (rawProgress >= 1) {
+        phaseRef.current = "idle";
+        camera.position.copy(frameEndPos);
+        camera.lookAt(currentTargetCoords);
+        if (controlsRef.current) {
+          controlsRef.current.target.copy(currentTargetCoords);
+          controlsRef.current.enabled = true;
+          if (!selectedGalaxyId) {
+            controlsRef.current.autoRotate = true;
+          }
+        }
+        prevTrackingTarget.current.copy(currentTargetCoords);
+      }
+    } else {
+      // ── ACTIVE REAL-TIME TRACKING (IDLE PHASE) ──
+      // If locked onto a moving galaxy or sub-planet, shift both the camera position
+      // and controls target by the object's displacement from the previous frame.
+      const displace = currentTargetCoords.clone().sub(prevTrackingTarget.current);
+      camera.position.add(displace);
+
+      if (controlsRef.current) {
+        controlsRef.current.target.add(displace);
+        controlsRef.current.update();
+      }
+
+      prevTrackingTarget.current.copy(currentTargetCoords);
     }
   });
 
   return null;
+}
+
+// Helpers for specific heights
+function planetOffsetHeight(name: string): number {
+  if (name === "Achievements" || name === "LinkedIn") return 0.15;
+  return 0.25;
+}
+
+// Easing helpers
+function easeInOutCubic(x: number): number {
+  return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+}
+
+function easeOutCubic(x: number): number {
+  return 1 - Math.pow(1 - x, 3);
 }

@@ -3,6 +3,7 @@ import { useState } from "react";
 import PlanetInfo from "./components/PlanetInfo";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import type { SubPlanetData } from "./types/galaxy";
 
 import Projects    from "./pages/Projects";
 import Skills      from "./pages/Skills";
@@ -38,7 +39,8 @@ function PageWrapper({ children }: { children: React.ReactNode }) {
 
 // ─── Universe home ────────────────────────────────────────────────────────────
 function UniverseHome() {
-  const [selectedPlanet, setSelectedPlanet] = useState<string | null>(null);
+  const [selectedGalaxyId, setSelectedGalaxyId] = useState<string | null>(null);
+  const [selectedPlanet, setSelectedPlanet] = useState<SubPlanetData | null>(null);
 
   // Persist across React Router navigations — session only (clears on tab close)
   const [enteredUniverse, setEnteredUniverse] = useState<boolean>(
@@ -54,11 +56,14 @@ function UniverseHome() {
   return (
     <div style={{ width: "100vw", height: "100vh", position: "relative", background: "#000005" }}>
       <SpaceScene
+        selectedGalaxyId={selectedGalaxyId}
+        setSelectedGalaxyId={setSelectedGalaxyId}
         selectedPlanet={selectedPlanet}
         setSelectedPlanet={setSelectedPlanet}
       />
 
       <PlanetInfo
+        selectedGalaxyId={selectedGalaxyId}
         selectedPlanet={selectedPlanet}
         setSelectedPlanet={setSelectedPlanet}
       />
