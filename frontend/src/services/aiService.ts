@@ -8,6 +8,9 @@ export interface AiConfig {
   ollamaModel: string;
   openaiKey: string;
   openaiModel: string;
+  voiceEnabled: boolean;
+  speechRate: number;
+  speechPitch: number;
 }
 
 export const DEFAULT_CONFIG: AiConfig = {
@@ -16,6 +19,9 @@ export const DEFAULT_CONFIG: AiConfig = {
   ollamaModel: "llama3",
   openaiKey: "",
   openaiModel: "gpt-4o-mini",
+  voiceEnabled: true,
+  speechRate: 1.0,
+  speechPitch: 1.0,
 };
 
 // Keyword scoring fallback logic
