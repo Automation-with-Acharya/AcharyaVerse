@@ -94,72 +94,79 @@ export default function PlanetPageLayout({
       <motion.nav
         style={{
           position: "fixed", top: "14px", left: 0, right: 0,
-          display: "flex", justifyContent: "space-between", alignItems: "center",
+          display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center",
           padding: "0 28px", zIndex: 50,
         }}
         initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        {/* Left — title pill */}
-        <motion.div
-          animate={{
-            background: scrolled ? "rgba(2,8,20,0.92)" : "rgba(2,8,20,0.5)",
-            backdropFilter: scrolled ? "blur(24px)" : "blur(10px)",
-            boxShadow: scrolled ? `0 4px 28px rgba(0,0,0,0.6), inset 0 0 0 1px ${accentColor}25` : "none",
-          }}
-          transition={{ duration: 0.3 }}
-          style={{
-            display: "flex", alignItems: "center", gap: "10px",
-            borderRadius: "50px", padding: "7px 18px 7px 7px",
-            border: `1px solid ${accentColor}18`,
-          }}
-        >
-          <motion.div
-            animate={{ boxShadow: [`0 0 6px ${accentColor}80`, `0 0 20px ${accentColor}`, `0 0 6px ${accentColor}80`] }}
-            transition={{ duration: 2, repeat: Infinity }}
+        {/* Left — return button */}
+        <div style={{ justifySelf: "start" }}>
+          <Link
+            to="/"
             style={{
-              width: "26px", height: "26px", borderRadius: "50%",
-              background: `${accentColor}20`, border: `1px solid ${accentColor}50`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "0.8rem",
+              display: "inline-flex", alignItems: "center", gap: "7px",
+              padding: "9px 20px", borderRadius: "50px",
+              background: "rgba(2,8,20,0.7)", backdropFilter: "blur(14px)",
+              border: `1px solid ${accentColor}28`, color: accentColor,
+              fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.9rem",
+              letterSpacing: "0.04em", textDecoration: "none", fontWeight: 500,
+              transition: "all 0.25s ease",
             }}
-          >✦</motion.div>
-          <span style={{
-            fontFamily: "'Orbitron', monospace", fontSize: "0.78rem",
-            fontWeight: 700, color: accentColor, letterSpacing: "0.14em", textTransform: "uppercase",
-          }}>
-            {title}
-          </span>
-        </motion.div>
+            onMouseEnter={(e) => {
+              const el = e.currentTarget as HTMLAnchorElement;
+              el.style.background = `${accentColor}18`;
+              el.style.borderColor = `${accentColor}55`;
+              el.style.boxShadow = `0 0 18px ${accentColor}25`;
+            }}
+            onMouseLeave={(e) => {
+              const el = e.currentTarget as HTMLAnchorElement;
+              el.style.background = "rgba(2,8,20,0.7)";
+              el.style.borderColor = `${accentColor}28`;
+              el.style.boxShadow = "none";
+            }}
+          >
+            ← Universe
+          </Link>
+        </div>
 
-        {/* Right — return button */}
-        <Link
-          to="/"
-          style={{
-            display: "inline-flex", alignItems: "center", gap: "7px",
-            padding: "9px 20px", borderRadius: "50px",
-            background: "rgba(2,8,20,0.7)", backdropFilter: "blur(14px)",
-            border: `1px solid ${accentColor}28`, color: accentColor,
-            fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.9rem",
-            letterSpacing: "0.04em", textDecoration: "none", fontWeight: 500,
-            transition: "all 0.25s ease",
-          }}
-          onMouseEnter={(e) => {
-            const el = e.currentTarget as HTMLAnchorElement;
-            el.style.background = `${accentColor}18`;
-            el.style.borderColor = `${accentColor}55`;
-            el.style.boxShadow = `0 0 18px ${accentColor}25`;
-          }}
-          onMouseLeave={(e) => {
-            const el = e.currentTarget as HTMLAnchorElement;
-            el.style.background = "rgba(2,8,20,0.7)";
-            el.style.borderColor = `${accentColor}28`;
-            el.style.boxShadow = "none";
-          }}
-        >
-          ← Universe
-        </Link>
+        {/* Center — title pill */}
+        <div style={{ justifySelf: "center" }}>
+          <motion.div
+            animate={{
+              background: scrolled ? "rgba(2,8,20,0.92)" : "rgba(2,8,20,0.5)",
+              backdropFilter: scrolled ? "blur(24px)" : "blur(10px)",
+              boxShadow: scrolled ? `0 4px 28px rgba(0,0,0,0.6), inset 0 0 0 1px ${accentColor}25` : "none",
+            }}
+            transition={{ duration: 0.3 }}
+            style={{
+              display: "flex", alignItems: "center", gap: "10px",
+              borderRadius: "50px", padding: "7px 18px 7px 7px",
+              border: `1px solid ${accentColor}18`,
+            }}
+          >
+            <motion.div
+              animate={{ boxShadow: [`0 0 6px ${accentColor}80`, `0 0 20px ${accentColor}`, `0 0 6px ${accentColor}80`] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              style={{
+                width: "26px", height: "26px", borderRadius: "50%",
+                background: `${accentColor}20`, border: `1px solid ${accentColor}50`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: "0.8rem",
+              }}
+            >✦</motion.div>
+            <span style={{
+              fontFamily: "'Orbitron', monospace", fontSize: "0.78rem",
+              fontWeight: 700, color: accentColor, letterSpacing: "0.14em", textTransform: "uppercase",
+            }}>
+              {title}
+            </span>
+          </motion.div>
+        </div>
+
+        {/* Right — balanced space */}
+        <div style={{ justifySelf: "end" }} />
       </motion.nav>
 
       {/* ── Hero banner — full width, dramatic ── */}

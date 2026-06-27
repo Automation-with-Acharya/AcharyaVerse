@@ -220,7 +220,7 @@ export default function Galaxy({
               onClick={() => {
                 if (isPlanetSelected) {
                   const externalLinks: Record<string, string> = {
-                    LinkedIn: "https://www.linkedin.com/in/mayank-acharya-01051998/",
+                    LinkedIn: "https://www.linkedin.com/in/mayank-acharya/",
                     GitHub: "https://github.com/Automation-with-Acharya",
                   };
                   if (externalLinks[planet.name]) {
