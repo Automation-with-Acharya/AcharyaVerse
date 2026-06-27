@@ -65,19 +65,17 @@ function SaturnRings({ radius }: { radius: number }) {
   );
 }
 
-function SolarPlanet({ body, speed }: { body: typeof SOLAR_BODIES[0]; speed: number }) {
-  const orbitRef = useRef<THREE.Group>(null);
+function SolarPlanet({ body, angle }: { body: typeof SOLAR_BODIES[0]; angle: number }) {
   const meshRef  = useRef<THREE.Mesh>(null);
 
   useFrame(() => {
-    if (orbitRef.current) orbitRef.current.rotation.y += body.speed * speed;
     if (meshRef.current)  meshRef.current.rotation.y  += 0.008;
   });
 
   return (
     <>
       <OrbitRing radius={body.orbit} />
-      <group ref={orbitRef}>
+      <group rotation={[0, angle, 0]}>
         <group position={[body.orbit, 0, 0]} rotation={[body.tilt, 0, 0]}>
           <mesh ref={meshRef}>
             <sphereGeometry args={[body.radius, 32, 32]} />
@@ -133,8 +131,13 @@ function Sun() {
   );
 }
 
-// Spacetime curvature grid driven by Sun + planet masses
-function SpacetimeSolarGrid({ sunMass, show }: { sunMass: number; show: boolean }) {
+// Spacetime curvature grid driven dynamically by Sun + planet orbital locations
+function SpacetimeSolarGrid({ sunMass, curvatureScale, angles, show }: {
+  sunMass: number;
+  curvatureScale: number;
+  angles: number[];
+  show: boolean;
+}) {
   const SEGS = 60, SIZE = 36;
   const geometry = useMemo(() => new THREE.PlaneGeometry(SIZE, SIZE, SEGS, SEGS), []);
 
@@ -146,15 +149,23 @@ function SpacetimeSolarGrid({ sunMass, show }: { sunMass: number; show: boolean 
     for (let i = 0; i < pos.count; i++) {
       const x = pos.getX(i);
       const z = pos.getZ(i);
-      // Sun well
+
+      // Sun gravity well
       const rSun = Math.sqrt(x * x + z * z);
-      let depth = (sunMass * 0.015) / Math.sqrt(rSun + 0.8);
-      // Planet wells (small ripple from orbiting bodies)
-      SOLAR_BODIES.forEach((b) => {
-        // Approximate planet at orbit radius along x
-        const r2 = Math.sqrt((x - b.orbit) ** 2 + z * z);
-        depth += 0.3 / Math.sqrt(r2 + 0.4);
+      let depth = (sunMass * 0.015 * curvatureScale) / Math.sqrt(rSun + 0.8);
+
+      // Planet gravity wells tracking actual orbits in real-time
+      SOLAR_BODIES.forEach((b, idx) => {
+        const angle = angles[idx] || 0;
+        // Map Y-axis group rotation back to plane coordinates
+        const px = Math.cos(angle) * b.orbit;
+        const pz = -Math.sin(angle) * b.orbit;
+
+        const rPlanet = Math.sqrt((x - px) ** 2 + (z - pz) ** 2);
+        // Deform grid locally around the planet using radius * scaling multiplier
+        depth += (b.radius * 0.25 * curvatureScale) / Math.sqrt(rPlanet + 0.4);
       });
+
       pos.setY(i, Math.max(-6, -Math.min(depth, 6)));
     }
     pos.needsUpdate = true;
@@ -183,27 +194,45 @@ function SpacetimeSolarGrid({ sunMass, show }: { sunMass: number; show: boolean 
   );
 }
 
-function SolarScene({ speedMultiplier, sunMass, showGrid }: {
-  speedMultiplier: number; sunMass: number; showGrid: boolean;
+function SolarScene({
+  speedMultiplier,
+  sunMass,
+  curvatureScale,
+  showGrid,
+}: {
+  speedMultiplier: number;
+  sunMass: number;
+  curvatureScale: number;
+  showGrid: boolean;
 }) {
+  const [angles, setAngles] = useState<number[]>(() => SOLAR_BODIES.map(() => Math.random() * Math.PI * 2));
+
+  useFrame((_, delta) => {
+    if (speedMultiplier === 0) return;
+    setAngles((prev) =>
+      prev.map((ang, idx) => ang + SOLAR_BODIES[idx].speed * speedMultiplier * delta * 8)
+    );
+  });
+
   return (
     <>
       <ambientLight intensity={0.15} />
       <Stars radius={80} depth={40} count={5000} factor={3} saturation={0.2} fade />
-      <SpacetimeSolarGrid sunMass={sunMass} show={showGrid} />
+      <SpacetimeSolarGrid sunMass={sunMass} curvatureScale={curvatureScale} angles={angles} show={showGrid} />
       <Sun />
-      {SOLAR_BODIES.map((b) => (
-        <SolarPlanet key={b.name} body={b} speed={speedMultiplier} />
+      {SOLAR_BODIES.map((b, idx) => (
+        <SolarPlanet key={b.name} body={b} angle={angles[idx] || 0} />
       ))}
     </>
   );
 }
 
 export function SolarSystemSim() {
-  const [speed,    setSpeed]    = useState(1);
-  const [paused,   setPaused]   = useState(false);
-  const [sunMass,  setSunMass]  = useState(5);
-  const [showGrid, setShowGrid] = useState(true);
+  const [speed,          setSpeed]          = useState(1);
+  const [paused,         setPaused]         = useState(false);
+  const [sunMass,        setSunMass]        = useState(5);
+  const [curvatureScale, setCurvatureScale] = useState(3.0);
+  const [showGrid,       setShowGrid]       = useState(true);
 
   // Kepler's 3rd law: T² ∝ a³ (relative to Earth=1)
   const keplerData = SOLAR_BODIES.map(b => ({
@@ -218,7 +247,7 @@ export function SolarSystemSim() {
         camera={{ position: [0, 12, 22], fov: 55 }}
         style={{ height: "75vh", width: "100%", display: "block" }}
       >
-        <SolarScene speedMultiplier={paused ? 0 : speed} sunMass={sunMass} showGrid={showGrid} />
+        <SolarScene speedMultiplier={paused ? 0 : speed} sunMass={sunMass} curvatureScale={curvatureScale} showGrid={showGrid} />
         <OrbitControls enableDamping dampingFactor={0.05} minDistance={3} maxDistance={60} />
       </Canvas>
 
@@ -247,16 +276,21 @@ export function SolarSystemSim() {
           color="#fbbf24" onChange={setSpeed}
         />
         <SliderControl
-          label="Sun Mass (affects spacetime grid)"
+          label="Sun Mass (affects well depth)"
           value={sunMass} min={1} max={20} step={0.5} unit=" M"
           color="#f97316" onChange={setSunMass}
+        />
+        <SliderControl
+          label="Spacetime Curvature Scale"
+          value={curvatureScale} min={1} max={10} step={0.5} unit="x"
+          color="#60a5fa" onChange={setCurvatureScale}
         />
 
         <div style={{ display: "flex", gap: "8px", marginTop: "10px", flexWrap: "wrap" }}>
           <LabButton color="#fbbf24" onClick={() => setPaused(!paused)}>
             {paused ? "▶ Resume" : "⏸ Pause"}
           </LabButton>
-          <LabButton color="#64748b" onClick={() => { setSpeed(1); setPaused(false); setSunMass(5); }}>
+          <LabButton color="#64748b" onClick={() => { setSpeed(1); setPaused(false); setSunMass(5); setCurvatureScale(3.0); }}>
             ↺ Reset
           </LabButton>
           <LabButton color={showGrid ? "#60a5fa" : "#334155"} onClick={() => setShowGrid(!showGrid)}>
