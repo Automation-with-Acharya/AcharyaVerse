@@ -339,7 +339,11 @@ export function SolarSystemSim() {
 // BLACK HOLE VISUALIZATION — gravitational lensing + particle accretion
 // ─────────────────────────────────────────────────────────
 
-function BlackHoleScene() {
+// ─────────────────────────────────────────────────────────
+// BLACK HOLE VISUALIZATION — gravitational lensing + particle accretion
+// ─────────────────────────────────────────────────────────
+
+function BlackHoleScene({ mass }: { mass: number }) {
   const diskRef   = useRef<THREE.Mesh>(null);
   const ring1Ref  = useRef<THREE.Mesh>(null);
   const ring2Ref  = useRef<THREE.Mesh>(null);
@@ -347,25 +351,31 @@ function BlackHoleScene() {
   const coreRef   = useRef<THREE.Mesh>(null);
   const glowRef   = useRef<THREE.Mesh>(null);
 
+  // Schwarzschild physics scaling factors
+  const Rs = 0.3 * mass; // Schwarzschild Radius inside simulation units
+  const Rphoton = 1.5 * Rs; // Photon sphere radius
+  const Risco = 3.0 * Rs; // Innermost stable circular orbit (ISCO)
+
   // Accretion particles
   const particleCount = 800;
   const { positions, colors } = useMemo(() => {
     const pos = new Float32Array(particleCount * 3);
     const col = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount; i++) {
-      const r = 1.8 + Math.random() * 3.5;
+      // Particles orbit outside the ISCO (3 * Rs)
+      const r = Risco + 0.5 + Math.random() * 3.5;
       const a = Math.random() * Math.PI * 2;
       pos[i * 3]     = Math.cos(a) * r;
       pos[i * 3 + 1] = (Math.random() - 0.5) * 0.3;
       pos[i * 3 + 2] = Math.sin(a) * r;
       // Hot inner → cooler outer gradient
-      const heat = 1 - (r - 1.8) / 3.5;
+      const heat = 1 - (r - Risco) / 3.5;
       col[i * 3]     = 1;
-      col[i * 3 + 1] = heat * 0.5;
-      col[i * 3 + 2] = heat * 0.1;
+      col[i * 3 + 1] = Math.max(0.1, heat * 0.6);
+      col[i * 3 + 2] = Math.max(0.05, heat * 0.2);
     }
     return { positions: pos, colors: col };
-  }, []);
+  }, [Risco]);
 
   const particleRef = useRef<THREE.Points>(null);
 
@@ -395,25 +405,25 @@ function BlackHoleScene() {
 
       {/* Event horizon glow */}
       <mesh ref={glowRef}>
-        <sphereGeometry args={[2.2, 32, 32]} />
+        <sphereGeometry args={[Rs * 2.2, 32, 32]} />
         <meshBasicMaterial color="#1a004d" transparent opacity={0.08} side={THREE.BackSide} />
       </mesh>
 
-      {/* Core */}
+      {/* Singularity Core (Event Horizon) */}
       <mesh ref={coreRef}>
-        <sphereGeometry args={[0.9, 64, 64]} />
+        <sphereGeometry args={[Rs, 64, 64]} />
         <meshStandardMaterial color="#000000" emissive="#0d0030" emissiveIntensity={0.5} />
       </mesh>
 
-      {/* Photon sphere ring */}
+      {/* Photon sphere ring (1.5 * Rs) */}
       <mesh rotation={[Math.PI / 2.2, 0.2, 0]}>
-        <torusGeometry args={[1.12, 0.025, 8, 120]} />
+        <torusGeometry args={[Rphoton, 0.025 * Rs, 8, 120]} />
         <meshBasicMaterial color="#ffffff" transparent opacity={0.6} />
       </mesh>
 
-      {/* Accretion disk — hot inner */}
+      {/* Accretion disk — hot inner (starting at ISCO = 3 * Rs) */}
       <mesh ref={diskRef} rotation={[Math.PI / 2.5, 0, 0]}>
-        <torusGeometry args={[1.6, 0.4, 16, 120]} />
+        <torusGeometry args={[Risco + 0.4, 0.3 * Rs, 16, 120]} />
         <meshStandardMaterial
           color="#ff6200"
           emissive="#ff4500"
@@ -426,23 +436,23 @@ function BlackHoleScene() {
 
       {/* Mid ring */}
       <mesh ref={ring1Ref} rotation={[Math.PI / 2.3, 0.4, 0]}>
-        <torusGeometry args={[2.2, 0.08, 8, 100]} />
+        <torusGeometry args={[Risco + 1.0, 0.06 * Rs, 8, 100]} />
         <meshStandardMaterial color="#9d174d" emissive="#be185d" emissiveIntensity={1.5} transparent opacity={0.7} />
       </mesh>
 
       {/* Outer glow ring */}
       <mesh ref={ring2Ref} rotation={[Math.PI / 2.1, 0.7, 0]}>
-        <torusGeometry args={[2.9, 0.04, 8, 100]} />
+        <torusGeometry args={[Risco + 1.8, 0.03 * Rs, 8, 100]} />
         <meshStandardMaterial color="#60a5fa" emissive="#3b82f6" emissiveIntensity={1.0} transparent opacity={0.4} />
       </mesh>
 
       {/* Relativistic jet */}
       <mesh ref={jetRef} position={[0, 0, 0]} rotation={[0, 0, 0]}>
-        <cylinderGeometry args={[0.04, 0.3, 8, 16, 1, true]} />
+        <cylinderGeometry args={[0.04 * Rs, 0.3 * Rs, 10, 16, 1, true]} />
         <meshBasicMaterial color="#a78bfa" transparent opacity={0.2} side={THREE.DoubleSide} />
       </mesh>
       <mesh ref={jetRef} position={[0, 0, 0]} rotation={[Math.PI, 0, 0]}>
-        <cylinderGeometry args={[0.04, 0.3, 8, 16, 1, true]} />
+        <cylinderGeometry args={[0.04 * Rs, 0.3 * Rs, 10, 16, 1, true]} />
         <meshBasicMaterial color="#a78bfa" transparent opacity={0.2} side={THREE.DoubleSide} />
       </mesh>
 
@@ -469,19 +479,51 @@ function BlackHoleScene() {
 }
 
 export function BlackHoleSim() {
+  const [mass, setMass] = useState(3.0); // Mass in Solar Masses (M☉)
+
+  // Derive physics metrics
+  const rsKm = mass * 2.953; // Schwarzschild radius in km
+  const photonSphereRadius = 1.5 * rsKm; // Photon sphere radius in km
+  const hawkingTemp = 1.227e23 / mass; // Hawking Temperature in Kelvin (using M_sol equivalent)
+  const iscoRadius = 3.0 * rsKm; // Innermost Stable Circular Orbit in km
+
   const bhStats = [
-    { label: "Event Horizon",  value: "~3 km/M☉",  color: "#f43f5e" },
-    { label: "Escape Vel.",    value: "c (light)",  color: "#a78bfa" },
-    { label: "Photon Sphere",  value: "1.5× Rs",    color: "#ffffff" },
-    { label: "Hawking Temp.",  value: "~10⁻⁷ K",   color: "#60a5fa" },
+    { label: "Schwarzschild Rs", value: `${rsKm.toFixed(2)} km`, color: "#f43f5e" },
+    { label: "Photon Sphere Radius", value: `${photonSphereRadius.toFixed(2)} km`, color: "#ffffff" },
+    { label: "ISCO Boundary", value: `${iscoRadius.toFixed(2)} km`, color: "#fbbf24" },
+    { label: "Hawking Temperature", value: hawkingTemp < 1e-6 ? `${hawkingTemp.toExponential(2)} K` : `${hawkingTemp.toFixed(6)} K`, color: "#60a5fa" },
   ];
 
   return (
     <div style={{ position: "relative", background: "#000000" }}>
       <Canvas camera={{ position: [0, 4, 9], fov: 55 }} style={{ height: "75vh", width: "100%", display: "block" }}>
-        <BlackHoleScene />
+        <BlackHoleScene mass={mass} />
         <OrbitControls enableDamping dampingFactor={0.05} minDistance={2} maxDistance={22} />
       </Canvas>
+
+      {/* Controls HUD — bottom left */}
+      <div
+        style={{
+          position: "absolute", bottom: "16px", left: "16px",
+          background: "rgba(2,0,8,0.85)", backdropFilter: "blur(20px)",
+          border: "1px solid rgba(244,63,94,0.2)", borderRadius: "16px",
+          padding: "20px 22px", zIndex: 10, minWidth: "280px",
+        }}
+      >
+        <div style={{ fontFamily: "'Orbitron', monospace", fontSize: "0.65rem", color: "#f43f5e", letterSpacing: "0.15em", marginBottom: "14px" }}>
+          BLACK HOLE CONTROLS
+        </div>
+        <SliderControl
+          label="Singularity Mass"
+          value={mass} min={1.0} max={12.0} step={0.2} unit=" M☉"
+          color="#f43f5e" onChange={setMass}
+        />
+        <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
+          <LabButton color="#f43f5e" onClick={() => setMass(3.0)}>
+            ↺ Reset Mass
+          </LabButton>
+        </div>
+      </div>
 
       {/* Physics stats HUD — top right */}
       <div
@@ -489,7 +531,7 @@ export function BlackHoleSim() {
           position: "absolute", top: "16px", right: "16px",
           background: "rgba(2,0,8,0.82)", backdropFilter: "blur(20px)",
           border: "1px solid rgba(244,63,94,0.2)", borderRadius: "14px",
-          padding: "16px 18px", zIndex: 10, minWidth: "180px",
+          padding: "16px 18px", zIndex: 10, minWidth: "200px",
         }}
       >
         <div style={{ fontFamily: "'Orbitron', monospace", fontSize: "0.6rem", color: "#f43f5e", letterSpacing: "0.15em", marginBottom: "12px" }}>
@@ -498,21 +540,21 @@ export function BlackHoleSim() {
         {bhStats.map(s => (
           <div key={s.label} style={{ marginBottom: "10px" }}>
             <div style={{ fontFamily: "'Orbitron', monospace", fontSize: "0.85rem", color: s.color, fontWeight: 700 }}>{s.value}</div>
-            <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.68rem", color: "#475569" }}>{s.label}</div>
+            <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.68rem", color: "#64748b" }}>{s.label}</div>
           </div>
         ))}
       </div>
 
-      {/* Hint overlay — bottom left */}
+      {/* Hint overlay — bottom left floating above stats */}
       <div
         style={{
-          position: "absolute", bottom: "16px", left: "16px",
+          position: "absolute", bottom: "140px", left: "16px",
           background: "rgba(2,0,8,0.75)", backdropFilter: "blur(14px)",
           border: "1px solid rgba(244,63,94,0.12)", borderRadius: "10px",
           padding: "10px 14px", zIndex: 10,
         }}
       >
-        <p style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#475569", fontSize: "0.72rem", margin: 0, lineHeight: 1.6 }}>
+        <p style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#94a3b8", fontSize: "0.72rem", margin: 0, lineHeight: 1.6 }}>
           Drag · Orbit &nbsp;|&nbsp; Scroll · Zoom &nbsp;|&nbsp; ISCO = 3× Schwarzschild radius
         </p>
       </div>
