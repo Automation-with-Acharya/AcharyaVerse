@@ -199,7 +199,7 @@ export default function Projects() {
 
   return (
     <PlanetPageLayout
-      title="PROJECTS PLANET"
+      title="PROJECTS GALAXY"
       subtitle="Real-world builds — from enterprise automation to interactive universes"
       accentColor="#60a5fa"
     >

@@ -95,7 +95,7 @@ export default function Experience() {
 
   return (
     <PlanetPageLayout
-      title="EXPERIENCE PLANET"
+      title="EXPERIENCE GALAXY"
       subtitle="A journey through 6+ years at Bank of America"
       accentColor="#f97316"
     >

@@ -64,7 +64,7 @@ export default function Contact() {
 
   return (
     <PlanetPageLayout
-      title="CONTACT PLANET"
+      title="CONTACT GALAXY"
       subtitle="Send a signal across the universe"
       accentColor="#22d3ee"
     >

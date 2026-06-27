@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PlanetPageLayout from "../components/PlanetPageLayout";
 
@@ -91,11 +91,24 @@ const experiments: Experiment[] = [
 
 export default function PhysicsLab() {
   const [active, setActive] = useState("solar");
+
+  // Load active tab from hash if present
+  useEffect(() => {
+    const hash = window.location.hash.replace("#", "").toLowerCase();
+    if (hash === "orbits" || hash === "solar") {
+      setActive("solar");
+    } else if (hash === "singularity" || hash === "blackhole") {
+      setActive("blackhole");
+    } else if (hash === "relativity") {
+      setActive("relativity");
+    }
+  }, []);
+
   const current = experiments.find((e) => e.id === active)!;
 
   return (
     <PlanetPageLayout
-      title="PHYSICS LAB"
+      title="PHYSICS LAB GALAXY"
       subtitle="Real simulations. Real physics. Interact, experiment, and discover."
       accentColor="#f43f5e"
     >

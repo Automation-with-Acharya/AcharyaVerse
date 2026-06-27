@@ -31,7 +31,7 @@ const certifications = [
 export default function Resume() {
   return (
     <PlanetPageLayout
-      title="RESUME PLANET"
+      title="RESUME GALAXY"
       subtitle="Software Engineer · Automation Expert · AI Builder"
       accentColor="#fbbf24"
     >

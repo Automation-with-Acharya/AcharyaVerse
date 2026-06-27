@@ -2,6 +2,7 @@ import { useRef, useState, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { Text, Sparkles } from "@react-three/drei";
+import { useNavigate } from "react-router-dom";
 import type { GalaxyData, SubPlanetData } from "../types/galaxy";
 
 interface GalaxyProps {
@@ -21,6 +22,7 @@ export default function Galaxy({
   onSelectPlanet,
   timeScale = 1.0,
 }: GalaxyProps) {
+  const navigate = useNavigate();
   const groupRef = useRef<THREE.Group>(null);
   const sunRef = useRef<THREE.Mesh>(null);
   const dustRef = useRef<THREE.Points>(null);
@@ -110,7 +112,23 @@ export default function Galaxy({
         }}
         onClick={(e) => {
           e.stopPropagation();
-          onSelectGalaxy(isGalaxySelected ? null : data.id);
+          if (isGalaxySelected) {
+            const routes: Record<string, string> = {
+              resume: "/resume",
+              experience: "/experience",
+              projects: "/projects",
+              skills: "/skills",
+              "ai-mayank": "/ai-mayank",
+              "physics-lab": "/physics-lab",
+              contact: "/contact",
+            };
+            const targetRoute = routes[data.id];
+            if (targetRoute) {
+              navigate(targetRoute);
+            }
+          } else {
+            onSelectGalaxy(data.id);
+          }
         }}
       >
         <sphereGeometry args={[0.7, 32, 32]} />
@@ -199,7 +217,39 @@ export default function Galaxy({
               isPlanetSelected={isPlanetSelected}
               isHovered={isHovered}
               onHoverChange={(h) => setHoveredPlanet(h ? planet.name : null)}
-              onClick={() => onSelectPlanet(isPlanetSelected ? null : planet)}
+              onClick={() => {
+                if (isPlanetSelected) {
+                  const externalLinks: Record<string, string> = {
+                    LinkedIn: "https://www.linkedin.com/in/mayank-acharya-01051998/",
+                    GitHub: "https://github.com/Automation-with-Acharya",
+                  };
+                  if (externalLinks[planet.name]) {
+                    window.open(externalLinks[planet.name], "_blank");
+                  } else {
+                    const internalRoutes: Record<string, string> = {
+                      Biography: "/resume",
+                      Achievements: "/resume",
+                      "Bank of America": "/experience",
+                      "Team Lead": "/experience",
+                      Development: "/skills",
+                      "Automation Skills": "/skills",
+                      "DevOps release": "/skills",
+                      "LLM Chat": "/ai-mayank",
+                      "Knowledge base": "/ai-mayank",
+                      Orbits: "/physics-lab#orbits",
+                      Singularity: "/physics-lab#singularity",
+                      "Relativity clock": "/physics-lab#relativity",
+                      AcharyaVerse: "/projects",
+                      "AI Mayank": "/projects",
+                      "RPA Automation": "/projects",
+                    };
+                    const route = internalRoutes[planet.name] || planet.path;
+                    navigate(route);
+                  }
+                } else {
+                  onSelectPlanet(planet);
+                }
+              }}
             />
           );
         })}

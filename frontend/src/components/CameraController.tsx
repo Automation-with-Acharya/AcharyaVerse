@@ -36,7 +36,7 @@ export function getPlanetWorldPos(
 
 // How close to zoom in
 const GALAXY_ZOOM_OFFSET = 5.5;
-const PLANET_ZOOM_OFFSET = 1.8;
+const PLANET_ZOOM_OFFSET = 2.6;
 
 // Overview position (default universe overview)
 const OVERVIEW_POSITION = new THREE.Vector3(0, 16, 26);
@@ -70,6 +70,9 @@ export default function CameraController({
   // Animation starting snapshots
   const startPos = useRef(new THREE.Vector3());
   const startTarget = useRef(new THREE.Vector3());
+
+  // Preserved camera offset from target to conserve rotation angle during zoom
+  const targetOffset = useRef(new THREE.Vector3(0, 5, 24));
 
   // Real-time tracking reference for previous frame
   const prevTrackingTarget = useRef(new THREE.Vector3(0, 0, 0));
@@ -106,6 +109,20 @@ export default function CameraController({
 
     elapsed.current = 0;
 
+    // Calculate view direction vector from target to camera to preserve user's custom angles
+    const dir = new THREE.Vector3().subVectors(camera.position, startTarget.current);
+    const dist = dir.length();
+    if (dist > 0.01) {
+      dir.normalize();
+    } else {
+      dir.set(0, 0.22, 1).normalize();
+    }
+    // Prevent clipping underneath the solar plane
+    if (dir.y < 0.18) {
+      dir.y = 0.18;
+      dir.normalize();
+    }
+
     if (selectedGalaxyId) {
       // Zooming to either Planet or Galaxy
       phaseRef.current = "zoom-in";
@@ -113,12 +130,19 @@ export default function CameraController({
         controlsRef.current.autoRotate = false;
         controlsRef.current.enabled = false;
       }
+
+      if (selectedPlanetName) {
+        targetOffset.current.copy(dir.multiplyScalar(PLANET_ZOOM_OFFSET));
+      } else {
+        targetOffset.current.copy(dir.multiplyScalar(GALAXY_ZOOM_OFFSET));
+      }
     } else {
       // Returning to universe overview
       phaseRef.current = "zoom-out";
       if (controlsRef.current) {
         controlsRef.current.enabled = false;
       }
+      targetOffset.current.copy(OVERVIEW_POSITION);
     }
   }, [selectedGalaxyId, selectedPlanetName, camera.position, controlsRef]);
 
@@ -156,6 +180,7 @@ export default function CameraController({
       } else if (phase === "zoom-in") {
         duration = ZOOM_DURATION;
         ease = easeInOutCubic;
+        cameraOffset.copy(targetOffset.current);
       } else {
         duration = RETURN_DURATION;
         ease = easeOutCubic;
@@ -190,6 +215,8 @@ export default function CameraController({
         if (controlsRef.current) {
           controlsRef.current.target.copy(currentTargetCoords);
           controlsRef.current.enabled = true;
+          // Force immediately updating controls status to register camera coords and prevent jumps
+          controlsRef.current.update();
           if (!selectedGalaxyId) {
             controlsRef.current.autoRotate = true;
           }

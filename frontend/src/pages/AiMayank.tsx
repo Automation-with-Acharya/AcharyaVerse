@@ -4,7 +4,7 @@ import AiChat from "../components/AiChat";
 export default function AiMayank() {
   return (
     <PlanetPageLayout
-      title="AI MAYANK"
+      title="AI MAYANK GALAXY"
       subtitle="Digital twin powered by personal knowledge — ask me anything"
       accentColor="#a78bfa"
     >
