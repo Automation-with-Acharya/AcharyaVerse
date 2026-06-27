@@ -6,7 +6,6 @@ import {
   BlackHoleSim,
   WaveInterferenceSim,
   NBodySim,
-  SpacetimeCurvatureSim,
   PendulumSim,
 } from "../components/PhysicsSimulations";
 
@@ -26,7 +25,7 @@ const experiments: Experiment[] = [
     label: "Solar System",
     emoji: "☀️",
     color: "#fbbf24",
-    tagline: "Newtonian Orbital Mechanics",
+    tagline: "Orbital mechanics with live spacetime curvature grid",
     branch: "Classical Mechanics",
     component: <SolarSystemSim />,
   },
@@ -35,25 +34,16 @@ const experiments: Experiment[] = [
     label: "Black Hole",
     emoji: "⚫",
     color: "#f43f5e",
-    tagline: "Gravitational Singularity & Accretion",
+    tagline: "Gravitational singularity, accretion disk & relativistic jets",
     branch: "General Relativity",
     component: <BlackHoleSim />,
-  },
-  {
-    id: "spacetime",
-    label: "Spacetime Curvature",
-    emoji: "🌀",
-    color: "#60a5fa",
-    tagline: "Gravity Wells — Not Ripples",
-    branch: "General Relativity",
-    component: <SpacetimeCurvatureSim />,
   },
   {
     id: "pendulum",
     label: "Pendulum",
     emoji: "🕰️",
     color: "#34d399",
-    tagline: "Simple & Double Pendulum — RK4",
+    tagline: "Simple & double pendulum — RK4 integration with chaos",
     branch: "Classical Mechanics",
     component: <PendulumSim />,
   },
@@ -62,7 +52,7 @@ const experiments: Experiment[] = [
     label: "Wave Interference",
     emoji: "〰️",
     color: "#a78bfa",
-    tagline: "Two-Source Superposition",
+    tagline: "Two-source superposition & constructive/destructive patterns",
     branch: "Wave Physics",
     component: <WaveInterferenceSim />,
   },
@@ -71,12 +61,11 @@ const experiments: Experiment[] = [
     label: "N-Body Chaos",
     emoji: "🌌",
     color: "#f97316",
-    tagline: "Gravitational Many-Body Problem",
+    tagline: "Gravitational many-body problem — sensitivity to initial conditions",
     branch: "Chaos Theory",
     component: <NBodySim />,
   },
 ];
-
 
 export default function PhysicsLab() {
   const [active, setActive] = useState("solar");
@@ -85,234 +74,222 @@ export default function PhysicsLab() {
   return (
     <PlanetPageLayout
       title="PHYSICS LAB"
-      subtitle="Interactive simulations where code meets the laws of nature"
+      subtitle="Real simulations. Real physics. Interact, experiment, and discover."
       accentColor="#f43f5e"
     >
-      {/* ── EXPERIMENT SELECTOR ───────────────────── */}
+      {/* ── FULL-WIDTH SPLIT LAYOUT ── */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-          gap: "12px",
-          marginBottom: "32px",
+          gridTemplateColumns: "220px 1fr",
+          gap: "0",
+          minHeight: "85vh",
+          marginLeft: "-48px",
+          marginRight: "-48px",
         }}
       >
-        {experiments.map((exp) => {
-          const isActive = active === exp.id;
-          return (
-            <motion.button
-              key={exp.id}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setActive(exp.id)}
-              style={{
-                padding: "16px 18px",
-                background: isActive ? `${exp.color}14` : "rgba(2,8,20,0.6)",
-                border: `1px solid ${isActive ? exp.color + "50" : "rgba(255,255,255,0.07)"}`,
-                borderRadius: "14px",
-                cursor: "pointer",
-                textAlign: "left",
-                transition: "all 0.2s ease",
-                boxShadow: isActive ? `0 0 20px ${exp.color}18` : "none",
-              }}
-            >
-              <div style={{ fontSize: "1.6rem", marginBottom: "6px" }}>{exp.emoji}</div>
-              <div
+        {/* ── LEFT: Experiment selector sidebar ── */}
+        <div
+          style={{
+            borderRight: "1px solid rgba(244,63,94,0.12)",
+            background: "rgba(2,4,12,0.6)",
+            backdropFilter: "blur(20px)",
+            padding: "28px 16px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "6px",
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: "0.65rem",
+              fontWeight: 700,
+              color: "#475569",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              marginBottom: "14px",
+              paddingLeft: "12px",
+            }}
+          >
+            Experiments
+          </div>
+
+          {experiments.map((exp) => {
+            const isActive = active === exp.id;
+            return (
+              <motion.button
+                key={exp.id}
+                whileHover={{ x: 3 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setActive(exp.id)}
                 style={{
-                  fontFamily: "'Orbitron', monospace",
-                  fontSize: "0.78rem",
-                  fontWeight: 700,
-                  color: isActive ? exp.color : "#94a3b8",
-                  letterSpacing: "0.05em",
-                  marginBottom: "3px",
+                  padding: "12px 14px",
+                  background: isActive ? `${exp.color}10` : "transparent",
+                  border: "none",
+                  borderLeft: `3px solid ${isActive ? exp.color : "transparent"}`,
+                  borderRadius: "0 10px 10px 0",
+                  cursor: "pointer",
+                  textAlign: "left",
+                  transition: "all 0.2s ease",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "3px",
                 }}
               >
-                {exp.label}
-              </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span style={{ fontSize: "1.1rem" }}>{exp.emoji}</span>
+                  <span
+                    style={{
+                      fontFamily: "'Orbitron', monospace",
+                      fontSize: "0.68rem",
+                      fontWeight: 700,
+                      color: isActive ? exp.color : "#94a3b8",
+                      letterSpacing: "0.04em",
+                    }}
+                  >
+                    {exp.label}
+                  </span>
+                </div>
+                {isActive && (
+                  <div
+                    style={{
+                      fontFamily: "'Space Grotesk', sans-serif",
+                      fontSize: "0.67rem",
+                      color: "#475569",
+                      lineHeight: 1.4,
+                      paddingLeft: "26px",
+                    }}
+                  >
+                    {exp.branch}
+                  </div>
+                )}
+              </motion.button>
+            );
+          })}
+
+          {/* Physics branches legend at bottom */}
+          <div style={{ marginTop: "auto", paddingTop: "24px", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+            <div
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontSize: "0.62rem",
+                fontWeight: 700,
+                color: "#334155",
+                letterSpacing: "0.15em",
+                textTransform: "uppercase",
+                marginBottom: "10px",
+                paddingLeft: "12px",
+              }}
+            >
+              Branches
+            </div>
+            {[
+              { label: "Classical", color: "#fbbf24" },
+              { label: "Relativity", color: "#f43f5e" },
+              { label: "Wave Physics", color: "#a78bfa" },
+              { label: "Chaos Theory", color: "#f97316" },
+            ].map((b) => (
               <div
+                key={b.label}
                 style={{
+                  display: "flex", alignItems: "center", gap: "8px",
+                  padding: "5px 12px",
                   fontFamily: "'Space Grotesk', sans-serif",
-                  fontSize: "0.72rem",
+                  fontSize: "0.68rem",
                   color: "#475569",
                 }}
               >
-                {exp.branch}
-              </div>
-              {isActive && (
                 <div
                   style={{
-                    marginTop: "8px",
-                    height: "2px",
-                    background: `linear-gradient(90deg, ${exp.color}, transparent)`,
-                    borderRadius: "1px",
+                    width: "6px", height: "6px", borderRadius: "50%",
+                    background: b.color, boxShadow: `0 0 6px ${b.color}`,
                   }}
                 />
-              )}
-            </motion.button>
-          );
-        })}
-      </div>
-
-      {/* ── ACTIVE EXPERIMENT HEADER ──────────────── */}
-      <motion.div
-        key={active}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        style={{ marginBottom: "20px" }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "6px" }}>
-          <span style={{ fontSize: "1.4rem" }}>{current.emoji}</span>
-          <h2
-            style={{
-              fontFamily: "'Orbitron', monospace",
-              fontSize: "1.1rem",
-              fontWeight: 700,
-              color: current.color,
-              letterSpacing: "0.06em",
-              margin: 0,
-            }}
-          >
-            {current.label}
-          </h2>
-          <span
-            style={{
-              padding: "3px 12px",
-              borderRadius: "50px",
-              background: `${current.color}12`,
-              border: `1px solid ${current.color}30`,
-              color: current.color,
-              fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: "0.72rem",
-              fontWeight: 500,
-            }}
-          >
-            {current.branch}
-          </span>
+                {b.label}
+              </div>
+            ))}
+          </div>
         </div>
-        <p
-          style={{
-            fontFamily: "'Space Grotesk', sans-serif",
-            color: "#64748b",
-            fontSize: "0.85rem",
-            margin: 0,
-          }}
-        >
-          {current.tagline} · Drag to orbit · Scroll to zoom
-        </p>
-      </motion.div>
 
-      {/* ── SIMULATION VIEWPORT ───────────────────── */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={active}
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.98 }}
-          transition={{ duration: 0.3 }}
-        >
-          {current.component}
-        </motion.div>
-      </AnimatePresence>
+        {/* ── RIGHT: Simulation fullscreen area ── */}
+        <div style={{ display: "flex", flexDirection: "column", position: "relative" }}>
 
-      {/* ── PHYSICS BRANCHES REFERENCE ────────────── */}
-      <div style={{ marginTop: "48px", marginBottom: "16px" }}>
-        <h2
-          style={{
-            fontFamily: "'Orbitron', monospace",
-            fontSize: "0.85rem",
-            fontWeight: 700,
-            color: "#f43f5e",
-            letterSpacing: "0.15em",
-            textTransform: "uppercase",
-            marginBottom: "16px",
-          }}
-        >
-          ✦ Physics Branches Explored
-        </h2>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-            gap: "12px",
-            paddingBottom: "60px",
-          }}
-        >
-          {[
-            {
-              icon: "🌍", label: "Classical Mechanics",
-              items: ["Newton's Laws", "Orbital Mechanics", "Gravitational Force", "Kepler's Laws"],
-              color: "#fbbf24",
-            },
-            {
-              icon: "🌀", label: "General Relativity",
-              items: ["Spacetime Curvature", "Event Horizons", "Gravitational Lensing", "Schwarzschild Radius"],
-              color: "#f43f5e",
-            },
-            {
-              icon: "〰️", label: "Wave Physics",
-              items: ["Superposition", "Constructive Interference", "Destructive Interference", "Double-Slit"],
-              color: "#60a5fa",
-            },
-            {
-              icon: "🌪️", label: "Chaos Theory",
-              items: ["N-body Problem", "Sensitivity to IC", "Lyapunov Exponent", "Poincaré Section"],
-              color: "#a78bfa",
-            },
-            {
-              icon: "⚛️", label: "Quantum Mechanics",
-              items: ["Wave-Particle Duality", "Heisenberg Uncertainty", "Schrödinger Eq.", "Quantum Tunneling"],
-              color: "#34d399",
-            },
-            {
-              icon: "💫", label: "Astrophysics",
-              items: ["Stellar Evolution", "Neutron Stars", "Dark Matter", "Cosmic Inflation"],
-              color: "#22d3ee",
-            },
-          ].map((branch) => (
-            <div
-              key={branch.label}
+          {/* Experiment header bar */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={active + "_header"}
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
               style={{
-                background: `${branch.color}07`,
-                border: `1px solid ${branch.color}20`,
-                borderRadius: "14px",
-                padding: "18px 18px",
+                padding: "18px 28px",
+                borderBottom: `1px solid ${current.color}15`,
+                background: `linear-gradient(90deg, ${current.color}08, transparent)`,
+                display: "flex",
+                alignItems: "center",
+                gap: "14px",
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
-                <span style={{ fontSize: "1.2rem" }}>{branch.icon}</span>
-                <span
+              <span style={{ fontSize: "1.6rem" }}>{current.emoji}</span>
+              <div>
+                <h2
                   style={{
                     fontFamily: "'Orbitron', monospace",
-                    fontSize: "0.75rem",
+                    fontSize: "1rem",
                     fontWeight: 700,
-                    color: branch.color,
-                    letterSpacing: "0.04em",
+                    color: current.color,
+                    letterSpacing: "0.06em",
+                    margin: 0,
+                    marginBottom: "2px",
                   }}
                 >
-                  {branch.label}
-                </span>
+                  {current.label}
+                </h2>
+                <p
+                  style={{
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    color: "#475569",
+                    fontSize: "0.78rem",
+                    margin: 0,
+                  }}
+                >
+                  {current.tagline}
+                </p>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-                {branch.items.map((item) => (
-                  <div
-                    key={item}
-                    style={{
-                      fontFamily: "'Space Grotesk', sans-serif",
-                      color: "#64748b",
-                      fontSize: "0.78rem",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                    }}
-                  >
-                    <span style={{ color: branch.color, fontSize: "0.6rem" }}>✦</span>
-                    {item}
-                  </div>
-                ))}
+              <div
+                style={{
+                  marginLeft: "auto",
+                  padding: "4px 12px",
+                  borderRadius: "50px",
+                  background: `${current.color}10`,
+                  border: `1px solid ${current.color}30`,
+                  color: current.color,
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontSize: "0.68rem",
+                  fontWeight: 600,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {current.branch}
               </div>
-            </div>
-          ))}
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Simulation viewport — fills remaining height */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={active}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.35 }}
+              style={{ flex: 1 }}
+            >
+              {current.component}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </PlanetPageLayout>

@@ -133,11 +133,64 @@ function Sun() {
   );
 }
 
-function SolarScene({ speedMultiplier }: { speedMultiplier: number }) {
+// Spacetime curvature grid driven by Sun + planet masses
+function SpacetimeSolarGrid({ sunMass, show }: { sunMass: number; show: boolean }) {
+  const SEGS = 60, SIZE = 36;
+  const geometry = useMemo(() => new THREE.PlaneGeometry(SIZE, SIZE, SEGS, SEGS), []);
+
+  const orbitGroupRef = useRef<THREE.Group>(null);
+
+  useFrame(() => {
+    if (!show) return;
+    const pos = geometry.attributes.position as THREE.BufferAttribute;
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i);
+      const z = pos.getZ(i);
+      // Sun well
+      const rSun = Math.sqrt(x * x + z * z);
+      let depth = (sunMass * 0.015) / Math.sqrt(rSun + 0.8);
+      // Planet wells (small ripple from orbiting bodies)
+      SOLAR_BODIES.forEach((b) => {
+        // Approximate planet at orbit radius along x
+        const r2 = Math.sqrt((x - b.orbit) ** 2 + z * z);
+        depth += 0.3 / Math.sqrt(r2 + 0.4);
+      });
+      pos.setY(i, Math.max(-6, -Math.min(depth, 6)));
+    }
+    pos.needsUpdate = true;
+    geometry.computeVertexNormals();
+  });
+
+  if (!show) return null;
+  return (
+    <group ref={orbitGroupRef}>
+      <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.5, 0]}>
+        <meshBasicMaterial color="#1d4ed8" wireframe transparent opacity={0.18} />
+      </mesh>
+      <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.52, 0]}>
+        <meshStandardMaterial
+          color="#1e3a8a"
+          emissive="#1d4ed8"
+          emissiveIntensity={0.15}
+          transparent
+          opacity={0.25}
+          roughness={0.2}
+          metalness={0.4}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+    </group>
+  );
+}
+
+function SolarScene({ speedMultiplier, sunMass, showGrid }: {
+  speedMultiplier: number; sunMass: number; showGrid: boolean;
+}) {
   return (
     <>
       <ambientLight intensity={0.15} />
       <Stars radius={80} depth={40} count={5000} factor={3} saturation={0.2} fade />
+      <SpacetimeSolarGrid sunMass={sunMass} show={showGrid} />
       <Sun />
       {SOLAR_BODIES.map((b) => (
         <SolarPlanet key={b.name} body={b} speed={speedMultiplier} />
@@ -147,48 +200,102 @@ function SolarScene({ speedMultiplier }: { speedMultiplier: number }) {
 }
 
 export function SolarSystemSim() {
-  const [speed, setSpeed] = useState(1);
-  const [paused, setPaused] = useState(false);
+  const [speed,    setSpeed]    = useState(1);
+  const [paused,   setPaused]   = useState(false);
+  const [sunMass,  setSunMass]  = useState(5);
+  const [showGrid, setShowGrid] = useState(true);
+
+  // Kepler's 3rd law: T² ∝ a³ (relative to Earth=1)
+  const keplerData = SOLAR_BODIES.map(b => ({
+    name: b.name,
+    T: (b.orbit / 4.4) ** 1.5, // relative period
+  }));
 
   return (
-    <div>
+    <div style={{ position: "relative", background: "#000005" }}>
+      {/* Full-bleed canvas */}
+      <Canvas
+        camera={{ position: [0, 12, 22], fov: 55 }}
+        style={{ height: "75vh", width: "100%", display: "block" }}
+      >
+        <SolarScene speedMultiplier={paused ? 0 : speed} sunMass={sunMass} showGrid={showGrid} />
+        <OrbitControls enableDamping dampingFactor={0.05} minDistance={3} maxDistance={60} />
+      </Canvas>
+
+      {/* Floating HUD controls — glassmorphism panel */}
       <div
         style={{
-          background: "rgba(0,0,5,0.8)",
+          position: "absolute",
+          bottom: "24px",
+          left: "24px",
+          background: "rgba(2,4,12,0.82)",
+          backdropFilter: "blur(20px)",
           border: "1px solid rgba(251,191,36,0.2)",
           borderRadius: "16px",
-          overflow: "hidden",
-          marginBottom: "20px",
+          padding: "20px 22px",
+          minWidth: "280px",
+          zIndex: 10,
         }}
       >
-        <Canvas camera={{ position: [0, 12, 22], fov: 55 }} style={{ height: "480px" }}>
-          <SolarScene speedMultiplier={paused ? 0 : speed} />
-          <OrbitControls enableDamping dampingFactor={0.05} minDistance={3} maxDistance={40} />
-        </Canvas>
-      </div>
+        <div style={{ fontFamily: "'Orbitron', monospace", fontSize: "0.65rem", color: "#fbbf24", letterSpacing: "0.15em", marginBottom: "14px" }}>
+          SIMULATION CONTROLS
+        </div>
 
-      <PhysicsControls>
         <SliderControl
           label="Orbital Speed"
-          value={speed}
-          min={0.1} max={5} step={0.1}
-          unit="x"
-          color="#fbbf24"
-          onChange={setSpeed}
+          value={speed} min={0.1} max={8} step={0.1} unit="x"
+          color="#fbbf24" onChange={setSpeed}
         />
-        <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+        <SliderControl
+          label="Sun Mass (affects spacetime grid)"
+          value={sunMass} min={1} max={20} step={0.5} unit=" M"
+          color="#f97316" onChange={setSunMass}
+        />
+
+        <div style={{ display: "flex", gap: "8px", marginTop: "10px", flexWrap: "wrap" }}>
           <LabButton color="#fbbf24" onClick={() => setPaused(!paused)}>
             {paused ? "▶ Resume" : "⏸ Pause"}
           </LabButton>
-          <LabButton color="#64748b" onClick={() => { setSpeed(1); setPaused(false); }}>
+          <LabButton color="#64748b" onClick={() => { setSpeed(1); setPaused(false); setSunMass(5); }}>
             ↺ Reset
           </LabButton>
+          <LabButton color={showGrid ? "#60a5fa" : "#334155"} onClick={() => setShowGrid(!showGrid)}>
+            {showGrid ? "⊞ Grid ON" : "⊟ Grid OFF"}
+          </LabButton>
         </div>
-      </PhysicsControls>
+      </div>
+
+      {/* Kepler data panel — top right */}
+      <div
+        style={{
+          position: "absolute",
+          top: "16px",
+          right: "16px",
+          background: "rgba(2,4,12,0.75)",
+          backdropFilter: "blur(16px)",
+          border: "1px solid rgba(251,191,36,0.12)",
+          borderRadius: "12px",
+          padding: "14px 16px",
+          zIndex: 10,
+          minWidth: "160px",
+        }}
+      >
+        <div style={{ fontFamily: "'Orbitron', monospace", fontSize: "0.6rem", color: "#fbbf24", letterSpacing: "0.12em", marginBottom: "10px" }}>
+          KEPLER DATA · T² ∝ a³
+        </div>
+        {keplerData.map(p => (
+          <div key={p.name} style={{ display: "flex", justifyContent: "space-between", gap: "16px", marginBottom: "4px" }}>
+            <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.72rem", color: "#64748b" }}>{p.name}</span>
+            <span style={{ fontFamily: "'Orbitron', monospace", fontSize: "0.68rem", color: "#fbbf24", fontWeight: 600 }}>
+              {p.T.toFixed(2)}yr
+            </span>
+          </div>
+        ))}
+      </div>
 
       <PhysicsFact color="#fbbf24">
-        🌍 Earth's orbital speed is ~29.8 km/s. Jupiter takes 11.86 Earth years to orbit the Sun.
-        Saturn's rings are made of ice and rock, stretching 282,000 km but only 30 m thick.
+        ☀️ Kepler's 3rd Law: T² ∝ a³. The spacetime grid shows how the Sun's gravity curves space — increase Sun Mass to see deeper wells.
+        Orbital speed follows Kepler's 2nd Law: planets move fastest at perihelion.
       </PhysicsFact>
     </div>
   );
@@ -328,61 +435,57 @@ function BlackHoleScene() {
 }
 
 export function BlackHoleSim() {
-  return (
-    <div>
-      <div
-        style={{
-          background: "rgba(0,0,5,0.9)",
-          border: "1px solid rgba(244,63,94,0.2)",
-          borderRadius: "16px",
-          overflow: "hidden",
-          marginBottom: "20px",
-        }}
-      >
-        <Canvas camera={{ position: [0, 4, 9], fov: 55 }} style={{ height: "480px" }}>
-          <BlackHoleScene />
-          <OrbitControls enableDamping dampingFactor={0.05} minDistance={3} maxDistance={20} />
-        </Canvas>
-      </div>
+  const bhStats = [
+    { label: "Event Horizon",  value: "~3 km/M☉",  color: "#f43f5e" },
+    { label: "Escape Vel.",    value: "c (light)",  color: "#a78bfa" },
+    { label: "Photon Sphere",  value: "1.5× Rs",    color: "#ffffff" },
+    { label: "Hawking Temp.",  value: "~10⁻⁷ K",   color: "#60a5fa" },
+  ];
 
+  return (
+    <div style={{ position: "relative", background: "#000000" }}>
+      <Canvas camera={{ position: [0, 4, 9], fov: 55 }} style={{ height: "75vh", width: "100%", display: "block" }}>
+        <BlackHoleScene />
+        <OrbitControls enableDamping dampingFactor={0.05} minDistance={2} maxDistance={22} />
+      </Canvas>
+
+      {/* Physics stats HUD — top right */}
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-          gap: "12px",
-          marginBottom: "16px",
+          position: "absolute", top: "16px", right: "16px",
+          background: "rgba(2,0,8,0.82)", backdropFilter: "blur(20px)",
+          border: "1px solid rgba(244,63,94,0.2)", borderRadius: "14px",
+          padding: "16px 18px", zIndex: 10, minWidth: "180px",
         }}
       >
-        {[
-          { label: "Event Horizon Radius",  value: "~3 km / M☉",  color: "#f43f5e" },
-          { label: "Escape Velocity",       value: "Speed of Light", color: "#a78bfa" },
-          { label: "Photon Sphere",         value: "1.5× Rs",      color: "#ffffff" },
-          { label: "Hawking Temp.",         value: "~10⁻⁷ K (stellar)", color: "#60a5fa" },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            style={{
-              background: `${stat.color}0c`,
-              border: `1px solid ${stat.color}25`,
-              borderRadius: "12px",
-              padding: "14px",
-              textAlign: "center",
-            }}
-          >
-            <div style={{ fontFamily: "'Orbitron', monospace", fontSize: "0.9rem", color: stat.color, marginBottom: "4px" }}>
-              {stat.value}
-            </div>
-            <div style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#64748b", fontSize: "0.75rem" }}>
-              {stat.label}
-            </div>
+        <div style={{ fontFamily: "'Orbitron', monospace", fontSize: "0.6rem", color: "#f43f5e", letterSpacing: "0.15em", marginBottom: "12px" }}>
+          SINGULARITY DATA
+        </div>
+        {bhStats.map(s => (
+          <div key={s.label} style={{ marginBottom: "10px" }}>
+            <div style={{ fontFamily: "'Orbitron', monospace", fontSize: "0.85rem", color: s.color, fontWeight: 700 }}>{s.value}</div>
+            <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.68rem", color: "#475569" }}>{s.label}</div>
           </div>
         ))}
       </div>
 
+      {/* Hint overlay — bottom left */}
+      <div
+        style={{
+          position: "absolute", bottom: "16px", left: "16px",
+          background: "rgba(2,0,8,0.75)", backdropFilter: "blur(14px)",
+          border: "1px solid rgba(244,63,94,0.12)", borderRadius: "10px",
+          padding: "10px 14px", zIndex: 10,
+        }}
+      >
+        <p style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#475569", fontSize: "0.72rem", margin: 0, lineHeight: 1.6 }}>
+          Drag · Orbit &nbsp;|&nbsp; Scroll · Zoom &nbsp;|&nbsp; ISCO = 3× Schwarzschild radius
+        </p>
+      </div>
+
       <PhysicsFact color="#f43f5e">
-        ⚫ The innermost stable circular orbit (ISCO) sits at 3× the Schwarzschild radius.
-        Inside the event horizon, spacetime curvature is so extreme that all future paths point toward the singularity.
-        Relativistic jets (shown) can extend thousands of light-years at near-light speeds.
+        ⚫ Inside the event horizon, all future paths point to the singularity. Relativistic jets extend thousands of light-years.
+        The photon sphere (white ring) marks where light orbits at exactly 1.5× the Schwarzschild radius.
       </PhysicsFact>
     </div>
   );
@@ -465,42 +568,65 @@ function WaveScene({ freq1, freq2, amplitude, paused }: {
 }
 
 export function WaveInterferenceSim() {
-  const [freq1, setFreq1]     = useState(1.5);
-  const [freq2, setFreq2]     = useState(1.5);
-  const [amplitude, setAmp]   = useState(1.2);
-  const [paused, setPaused]   = useState(false);
+  const [freq1, setFreq1]   = useState(1.5);
+  const [freq2, setFreq2]   = useState(1.5);
+  const [amplitude, setAmp] = useState(1.2);
+  const [paused, setPaused] = useState(false);
+
+  // Derived physics
+  const sameFreq = Math.abs(freq1 - freq2) < 0.05;
+  const beatFreq = Math.abs(freq1 - freq2).toFixed(2);
 
   return (
-    <div>
+    <div style={{ position: "relative", background: "#000010" }}>
+      <Canvas camera={{ position: [0, 12, 8], fov: 55 }} style={{ height: "75vh", width: "100%", display: "block" }}>
+        <WaveScene freq1={freq1} freq2={freq2} amplitude={amplitude} paused={paused} />
+        <OrbitControls enableDamping />
+      </Canvas>
+
+      {/* Controls HUD */}
       <div
         style={{
-          background: "rgba(0,0,20,0.9)",
-          border: "1px solid rgba(96,165,250,0.2)",
-          borderRadius: "16px",
-          overflow: "hidden",
-          marginBottom: "20px",
+          position: "absolute", bottom: "16px", left: "16px",
+          background: "rgba(2,4,20,0.85)", backdropFilter: "blur(20px)",
+          border: "1px solid rgba(167,139,250,0.2)", borderRadius: "16px",
+          padding: "20px 22px", zIndex: 10, minWidth: "280px",
         }}
       >
-        <Canvas camera={{ position: [0, 12, 8], fov: 55 }} style={{ height: "480px" }}>
-          <WaveScene freq1={freq1} freq2={freq2} amplitude={amplitude} paused={paused} />
-          <OrbitControls enableDamping />
-        </Canvas>
-      </div>
-
-      <PhysicsControls>
+        <div style={{ fontFamily: "'Orbitron', monospace", fontSize: "0.65rem", color: "#a78bfa", letterSpacing: "0.15em", marginBottom: "14px" }}>
+          WAVE CONTROLS
+        </div>
         <SliderControl label="Source 1 Frequency" value={freq1} min={0.5} max={4} step={0.1} unit=" Hz" color="#a78bfa" onChange={setFreq1} />
         <SliderControl label="Source 2 Frequency" value={freq2} min={0.5} max={4} step={0.1} unit=" Hz" color="#34d399" onChange={setFreq2} />
         <SliderControl label="Amplitude" value={amplitude} min={0.2} max={2.5} step={0.1} unit="" color="#60a5fa" onChange={setAmp} />
-        <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-          <LabButton color="#60a5fa" onClick={() => setPaused(!paused)}>{paused ? "▶ Resume" : "⏸ Pause"}</LabButton>
+        <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
+          <LabButton color="#a78bfa" onClick={() => setPaused(!paused)}>{paused ? "▶ Resume" : "⏸ Pause"}</LabButton>
           <LabButton color="#64748b" onClick={() => { setFreq1(1.5); setFreq2(1.5); setAmp(1.2); setPaused(false); }}>↺ Reset</LabButton>
         </div>
-      </PhysicsControls>
+      </div>
 
-      <PhysicsFact color="#60a5fa">
-        〰️ When two waves meet, constructive interference creates bright fringes (crests align),
-        destructive interference creates dark fringes (crest meets trough). This is the principle
-        behind double-slit experiments, radio antennas, and noise-cancelling headphones.
+      {/* Physics readout — top right */}
+      <div
+        style={{
+          position: "absolute", top: "16px", right: "16px",
+          background: "rgba(2,4,20,0.82)", backdropFilter: "blur(16px)",
+          border: "1px solid rgba(167,139,250,0.15)", borderRadius: "12px",
+          padding: "14px 18px", zIndex: 10,
+        }}
+      >
+        <div style={{ fontFamily: "'Orbitron', monospace", fontSize: "0.6rem", color: "#a78bfa", letterSpacing: "0.12em", marginBottom: "10px" }}>INTERFERENCE</div>
+        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.78rem", color: sameFreq ? "#34d399" : "#fbbf24", marginBottom: "4px" }}>
+          {sameFreq ? "✓ Standing wave pattern" : `Beat frequency: ${beatFreq} Hz`}
+        </div>
+        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.72rem", color: "#475569" }}>
+          {sameFreq ? "Constructive/destructive maxima fixed" : "Nodes oscillate at beat frequency"}
+        </div>
+      </div>
+
+      <PhysicsFact color="#a78bfa">
+        〰️ Set both frequencies equal for a stable interference pattern with fixed nodes.
+        Make them different to observe beating — the apparent pulsation of amplitude at the difference frequency.
+        This is the principle behind noise-cancelling headphones and acoustic engineers.
       </PhysicsFact>
     </div>
   );
@@ -614,26 +740,25 @@ export function NBodySim() {
   const [simKey, setSimKey]       = useState(0);
 
   return (
-    <div>
+    <div style={{ position: "relative", background: "#000005" }}>
+      <Canvas key={simKey} camera={{ position: [0, 8, 18], fov: 55 }} style={{ height: "75vh", width: "100%", display: "block" }}>
+        <NBodyScene bodyCount={bodyCount} speed={speed} paused={paused} simKey={simKey} />
+        <OrbitControls enableDamping />
+      </Canvas>
+
+      {/* Controls HUD */}
       <div
         style={{
-          background: "rgba(0,0,5,0.85)",
-          border: "1px solid rgba(167,139,250,0.2)",
-          borderRadius: "16px",
-          overflow: "hidden",
-          marginBottom: "20px",
+          position: "absolute", bottom: "16px", left: "16px",
+          background: "rgba(2,4,12,0.85)", backdropFilter: "blur(20px)",
+          border: "1px solid rgba(249,115,22,0.2)", borderRadius: "16px",
+          padding: "20px 22px", zIndex: 10, minWidth: "280px",
         }}
       >
-        <Canvas camera={{ position: [0, 8, 18], fov: 55 }} style={{ height: "480px" }}>
-          <NBodyScene bodyCount={bodyCount} speed={speed} paused={paused} simKey={simKey} />
-          <OrbitControls enableDamping />
-        </Canvas>
-      </div>
-
-      <PhysicsControls>
+        <div style={{ fontFamily: "'Orbitron', monospace", fontSize: "0.65rem", color: "#f97316", letterSpacing: "0.15em", marginBottom: "14px" }}>N-BODY CONTROLS</div>
         <div style={{ marginBottom: "14px" }}>
           <div style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#94a3b8", fontSize: "0.82rem", marginBottom: "8px" }}>
-            Bodies: <span style={{ color: "#a78bfa", fontWeight: 600 }}>{bodyCount}</span>
+            Bodies: <span style={{ color: "#f97316", fontWeight: 600 }}>{bodyCount}</span>
           </div>
           <div style={{ display: "flex", gap: "8px" }}>
             {[3, 4, 5].map((n) => (
@@ -641,14 +766,11 @@ export function NBodySim() {
                 key={n}
                 onClick={() => { setBodyCount(n); setSimKey((k) => k + 1); }}
                 style={{
-                  padding: "7px 18px",
-                  borderRadius: "8px",
-                  border: `1px solid ${n === bodyCount ? "#a78bfa" : "rgba(255,255,255,0.1)"}`,
-                  background: n === bodyCount ? "rgba(167,139,250,0.15)" : "transparent",
-                  color: n === bodyCount ? "#a78bfa" : "#64748b",
-                  fontFamily: "'Space Grotesk', sans-serif",
-                  fontSize: "0.85rem",
-                  cursor: "pointer",
+                  padding: "7px 18px", borderRadius: "8px",
+                  border: `1px solid ${n === bodyCount ? "#f97316" : "rgba(255,255,255,0.1)"}`,
+                  background: n === bodyCount ? "rgba(249,115,22,0.15)" : "transparent",
+                  color: n === bodyCount ? "#f97316" : "#64748b",
+                  fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.85rem", cursor: "pointer",
                 }}
               >
                 {n} Bodies
@@ -656,17 +778,33 @@ export function NBodySim() {
             ))}
           </div>
         </div>
-        <SliderControl label="Simulation Speed" value={speed} min={0.1} max={3} step={0.1} unit="x" color="#a78bfa" onChange={setSpeed} />
-        <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-          <LabButton color="#a78bfa" onClick={() => setPaused(!paused)}>{paused ? "▶ Resume" : "⏸ Pause"}</LabButton>
+        <SliderControl label="Simulation Speed" value={speed} min={0.1} max={3} step={0.1} unit="x" color="#f97316" onChange={setSpeed} />
+        <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
+          <LabButton color="#f97316" onClick={() => setPaused(!paused)}>{paused ? "▶ Resume" : "⏸ Pause"}</LabButton>
           <LabButton color="#64748b" onClick={() => setSimKey((k) => k + 1)}>↺ Reset</LabButton>
         </div>
-      </PhysicsControls>
+      </div>
 
-      <PhysicsFact color="#a78bfa">
-        🌌 The N-body problem has no closed-form solution for N ≥ 3 (Poincaré, 1890).
-        The orbits are chaotic — tiny changes in initial conditions produce wildly different outcomes.
-        This is why we simulate the solar system numerically rather than analytically.
+      {/* Chaos readout */}
+      <div
+        style={{
+          position: "absolute", top: "16px", right: "16px",
+          background: "rgba(2,4,12,0.8)", backdropFilter: "blur(16px)",
+          border: "1px solid rgba(249,115,22,0.15)", borderRadius: "12px",
+          padding: "14px 18px", zIndex: 10,
+        }}
+      >
+        <div style={{ fontFamily: "'Orbitron', monospace", fontSize: "0.6rem", color: "#f97316", letterSpacing: "0.12em", marginBottom: "8px" }}>CHAOS METRICS</div>
+        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.72rem", color: "#64748b", lineHeight: 1.6 }}>
+          <div>Bodies: <span style={{ color: "#f97316" }}>{bodyCount}</span></div>
+          <div>Interactions: <span style={{ color: "#f97316" }}>{bodyCount * (bodyCount - 1) / 2}</span> pairs</div>
+          <div>Lyapunov: <span style={{ color: "#fbbf24" }}>diverges exponentially</span></div>
+        </div>
+      </div>
+
+      <PhysicsFact color="#f97316">
+        🌌 No closed-form solution exists for N≥3 (Poincaré, 1890). Reset to see completely different outcomes from
+        seemingly identical initial conditions — this is deterministic chaos. Real solar system stability is only known for ~5M years.
       </PhysicsFact>
     </div>
   );
@@ -1124,77 +1262,63 @@ export function PendulumSim() {
   const angle0Rad = (angle0 * Math.PI) / 180;
 
   return (
-    <div>
-      <div
-        style={{
-          background: "rgba(0,0,10,0.9)",
-          border: "1px solid rgba(34,211,153,0.2)",
-          borderRadius: "16px",
-          overflow: "hidden",
-          marginBottom: "20px",
-        }}
-      >
-        <Canvas key={simKey} camera={{ position: [0, -3, 14], fov: 50 }} style={{ height: "480px" }}>
+    <div style={{ position: "relative", background: "#000008", width: "100%", height: "100vh" }}>
+      <Canvas key={simKey} camera={{ position: [0, -3, 14], fov: 50 }} style={{ height: "100%", width: "100%", display: "block" }}>
           <PendulumScene
             length={length} gravity={g} damping={damping}
             angle0={angle0Rad} paused={paused}
             isDouble={isDouble} length2={length * 0.8} angle2_0={angle0Rad * 0.9}
           />
-          <OrbitControls enableDamping enableZoom minDistance={5} maxDistance={25} />
-        </Canvas>
-      </div>
+        <OrbitControls enableDamping enableZoom minDistance={5} maxDistance={25} />
+      </Canvas>
 
-      {/* Live stats */}
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-        gap: "12px",
-        marginBottom: "16px",
-      }}>
+      {/* Live stats HUD - top right */}
+      <div
+        style={{
+          position: "absolute", top: "16px", right: "16px",
+          background: "rgba(2,4,16,0.85)", backdropFilter: "blur(20px)",
+          border: "1px solid rgba(52,211,153,0.2)", borderRadius: "14px",
+          padding: "16px 18px", zIndex: 10, minWidth: "170px",
+        }}
+      >
+        <div style={{ fontFamily: "'Orbitron', monospace", fontSize: "0.6rem", color: "#34d399", letterSpacing: "0.15em", marginBottom: "12px" }}>LIVE PHYSICS</div>
         {[
           { label: "Period (T)",    value: `${period.toFixed(2)} s`,   color: "#34d399" },
           { label: "Gravity (g)",   value: `${g.toFixed(2)} m/s²`,     color: "#fbbf24" },
           { label: "Length (L)",    value: `${length.toFixed(2)} m`,   color: "#60a5fa" },
           { label: "Damping (b)",   value: `${damping.toFixed(3)}`,    color: "#a78bfa" },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            style={{
-              background: `${stat.color}0c`,
-              border: `1px solid ${stat.color}25`,
-              borderRadius: "12px",
-              padding: "14px",
-              textAlign: "center",
-            }}
-          >
-            <div style={{ fontFamily: "'Orbitron', monospace", fontSize: "1rem", color: stat.color, marginBottom: "4px", fontWeight: 700 }}>
-              {stat.value}
-            </div>
-            <div style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#64748b", fontSize: "0.75rem" }}>
-              {stat.label}
-            </div>
+        ].map(s => (
+          <div key={s.label} style={{ display: "flex", justifyContent: "space-between", gap: "16px", marginBottom: "8px" }}>
+            <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.7rem", color: "#475569" }}>{s.label}</span>
+            <span style={{ fontFamily: "'Orbitron', monospace", fontSize: "0.75rem", color: s.color, fontWeight: 700 }}>{s.value}</span>
           </div>
         ))}
       </div>
 
-      <PhysicsControls>
-        {/* Gravity preset */}
+      {/* Controls HUD - bottom left */}
+      <div
+        style={{
+          position: "absolute", bottom: "16px", left: "16px",
+          background: "rgba(2,4,16,0.85)", backdropFilter: "blur(20px)",
+          border: "1px solid rgba(52,211,153,0.2)", borderRadius: "16px",
+          padding: "20px 22px", zIndex: 10, minWidth: "300px",
+        }}
+      >
+        <div style={{ fontFamily: "'Orbitron', monospace", fontSize: "0.65rem", color: "#34d399", letterSpacing: "0.15em", marginBottom: "14px" }}>PENDULUM CONTROLS</div>
+
         <div style={{ marginBottom: "14px" }}>
-          <div style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#94a3b8", fontSize: "0.82rem", marginBottom: "8px" }}>Gravity World</div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+          <div style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#94a3b8", fontSize: "0.75rem", marginBottom: "6px" }}>Gravity World</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
             {Object.keys(GRAVITY_PRESETS).map((gp) => (
               <button
                 key={gp}
                 onClick={() => { setGravKey(gp); setSimKey(k => k + 1); }}
                 style={{
-                  padding: "6px 14px",
-                  borderRadius: "8px",
-                  border: `1px solid ${gp === gravKey ? "#34d399" : "rgba(255,255,255,0.1)"}`,
+                  padding: "5px 12px", borderRadius: "8px",
+                  border: `1px solid ${gp === gravKey ? "#34d399" : "rgba(255,255,255,0.08)"}`,
                   background: gp === gravKey ? "rgba(52,211,153,0.15)" : "transparent",
                   color: gp === gravKey ? "#34d399" : "#64748b",
-                  fontFamily: "'Space Grotesk', sans-serif",
-                  fontSize: "0.78rem",
-                  cursor: "pointer",
+                  fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.73rem", cursor: "pointer",
                 }}
               >
                 {gp}
@@ -1205,11 +1329,11 @@ export function PendulumSim() {
 
         <SliderControl label="Pendulum Length" value={length} min={0.3} max={3.0} step={0.1} unit=" m" color="#60a5fa"
           onChange={(v) => { setLength(v); setSimKey(k => k + 1); }} />
-        <SliderControl label="Release Angle" value={angle0} min={5} max={170} step={5} unit="°" color="#fbbf24"
+        <SliderControl label="Release Angle" value={angle0} min={5} max={170} step={5} unit="\u00b0" color="#fbbf24"
           onChange={(v) => { setAngle0(v); setSimKey(k => k + 1); }} />
         <SliderControl label="Air Damping" value={damping} min={0} max={0.5} step={0.01} unit="" color="#a78bfa" onChange={setDamping} />
 
-        <div style={{ display: "flex", gap: "10px", marginTop: "12px", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: "8px", marginTop: "10px", flexWrap: "wrap" }}>
           <LabButton color="#34d399" onClick={() => setPaused(!paused)}>
             {paused ? "▶ Resume" : "⏸ Pause"}
           </LabButton>
@@ -1221,13 +1345,11 @@ export function PendulumSim() {
             {isDouble ? "🔴 Double (Chaotic)" : "🔵 Single"}
           </LabButton>
         </div>
-      </PhysicsControls>
+      </div>
 
       <PhysicsFact color="#34d399">
-        🕰️ The period of a simple pendulum T = 2π√(L/g) depends only on length and gravity — not mass!
-        Galileo discovered this in 1602. The double pendulum is completely deterministic yet exhibits
-        true chaos — tiny changes in initial angle lead to wildly different long-term trajectories.
-        Switch to Double mode and observe the sensitivity to initial conditions.
+        🕰️ T = 2π√(L/g) — period only depends on length and gravity, not mass (Galileo, 1602).
+        Change gravity to Moon (1.62 m/s²) to see the period increase. Switch to Chaotic for true mathematical chaos.
       </PhysicsFact>
     </div>
   );
