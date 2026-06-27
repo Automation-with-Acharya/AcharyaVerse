@@ -8,6 +8,7 @@ export const galaxies: GalaxyData[] = [
     orbitRadius: 13,
     orbitSpeed: 0.0004,
     inclination: 0.15,
+    startAngle: 1.0,
     emoji: "📄",
     tagline: "Overview & Credentials",
     planets: [
@@ -40,6 +41,7 @@ export const galaxies: GalaxyData[] = [
     orbitRadius: 17,
     orbitSpeed: 0.0003,
     inclination: -0.1,
+    startAngle: 2.2,
     emoji: "🏛️",
     tagline: "Career Timeline",
     planets: [
@@ -72,6 +74,7 @@ export const galaxies: GalaxyData[] = [
     orbitRadius: 25,
     orbitSpeed: 0.00018,
     inclination: 0.3,
+    startAngle: 4.5,
     emoji: "🚀",
     tagline: "Showcase Sandbox",
     planets: [
@@ -114,6 +117,7 @@ export const galaxies: GalaxyData[] = [
     orbitRadius: 21,
     orbitSpeed: 0.00025,
     inclination: -0.22,
+    startAngle: 3.3,
     emoji: "⚡",
     tagline: "Technology Core",
     planets: [
@@ -156,6 +160,7 @@ export const galaxies: GalaxyData[] = [
     orbitRadius: 29,
     orbitSpeed: 0.00015,
     inclination: 0.1,
+    startAngle: 5.6,
     emoji: "🧠",
     tagline: "Quantum Digital Twin",
     planets: [
@@ -188,6 +193,7 @@ export const galaxies: GalaxyData[] = [
     orbitRadius: 33,
     orbitSpeed: 0.00012,
     inclination: -0.05,
+    startAngle: 0.5,
     emoji: "⚛️",
     tagline: "Physics Sandbox",
     planets: [
@@ -230,6 +236,7 @@ export const galaxies: GalaxyData[] = [
     orbitRadius: 9,
     orbitSpeed: 0.00065,
     inclination: 0.0,
+    startAngle: 6.0,
     emoji: "📡",
     tagline: "Uplink Channel",
     planets: [

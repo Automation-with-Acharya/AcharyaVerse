@@ -8,7 +8,7 @@ import { galaxies } from "../data/galaxies";
 export function getGalaxyWorldPos(galaxyId: string, t: number): THREE.Vector3 {
   const g = galaxies.find((x) => x.id === galaxyId);
   if (!g) return new THREE.Vector3(0, 0, 0);
-  const angle = t * g.orbitSpeed * 3.5;
+  const angle = t * g.orbitSpeed * 3.5 + g.startAngle;
   const x = Math.cos(angle) * g.orbitRadius;
   const z = Math.sin(angle) * g.orbitRadius;
   const y = Math.sin(angle) * g.orbitRadius * Math.sin(g.inclination);

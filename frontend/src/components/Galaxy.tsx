@@ -69,7 +69,7 @@ export default function Galaxy({
 
     // 1. Orbit the entire Galaxy around the central black hole
     if (groupRef.current) {
-      const angle = t * data.orbitSpeed * 3.5;
+      const angle = t * data.orbitSpeed * 3.5 + data.startAngle;
       const x = Math.cos(angle) * data.orbitRadius;
       const z = Math.sin(angle) * data.orbitRadius;
       // Tilt orbit slightly based on inclination

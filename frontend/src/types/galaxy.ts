@@ -16,6 +16,7 @@ export type GalaxyData = {
   orbitRadius: number;
   orbitSpeed: number;
   inclination: number; // inclination angle relative to X-Z plane in radians
+  startAngle: number; // Starting angle offset in radians to disperse galaxies
   emoji: string;
   tagline: string;
   planets: SubPlanetData[];
