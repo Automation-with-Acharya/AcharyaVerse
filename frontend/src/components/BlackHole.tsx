@@ -39,10 +39,10 @@ export default function BlackHole() {
   });
 
   return (
-    <group position={[0, 0, -5]}>
+    <group position={[0, 0, 0]}>
       {/* Core — dark event horizon */}
       <mesh ref={coreRef}>
-        <sphereGeometry args={[0.55, 64, 64]} />
+        <sphereGeometry args={[1.2, 64, 64]} />
         <meshStandardMaterial
           color="#000000"
           emissive="#1a0050"
@@ -54,7 +54,7 @@ export default function BlackHole() {
 
       {/* Outer glow sphere */}
       <mesh ref={glowRef}>
-        <sphereGeometry args={[1.1, 32, 32]} />
+        <sphereGeometry args={[2.4, 32, 32]} />
         <meshBasicMaterial
           color="#3b0099"
           transparent
@@ -65,7 +65,7 @@ export default function BlackHole() {
 
       {/* Accretion disk — hot inner ring */}
       <mesh ref={diskRef} rotation={[Math.PI / 2.5, 0, 0]}>
-        <torusGeometry args={[0.85, 0.22, 16, 100]} />
+        <torusGeometry args={[1.87, 0.48, 16, 100]} />
         <meshStandardMaterial
           color="#ff6200"
           emissive="#ff4500"
@@ -79,7 +79,7 @@ export default function BlackHole() {
 
       {/* Mid ring — cooler blue-purple */}
       <mesh ref={ring1Ref} rotation={[Math.PI / 2.2, 0.3, 0]}>
-        <torusGeometry args={[1.15, 0.06, 8, 80]} />
+        <torusGeometry args={[2.53, 0.13, 8, 80]} />
         <meshStandardMaterial
           color="#8b5cf6"
           emissive="#6d28d9"
@@ -91,7 +91,7 @@ export default function BlackHole() {
 
       {/* Outer halo ring */}
       <mesh ref={ring2Ref} rotation={[Math.PI / 1.8, 0.5, 0]}>
-        <torusGeometry args={[1.5, 0.03, 8, 80]} />
+        <torusGeometry args={[3.3, 0.06, 8, 80]} />
         <meshStandardMaterial
           color="#60a5fa"
           emissive="#3b82f6"
@@ -102,7 +102,7 @@ export default function BlackHole() {
       </mesh>
 
       {/* Point light to illuminate nearby planets */}
-      <pointLight color="#6d28d9" intensity={3} distance={20} />
+      <pointLight color="#ff6200" intensity={4} distance={30} />
     </group>
   );
 }

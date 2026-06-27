@@ -44,7 +44,7 @@ export default function Galaxy({
     for (let i = 0; i < count; i++) {
       // Golden spiral distribution
       const theta = i * 0.18;
-      const r = 0.8 + Math.pow(i / count, 0.7) * 4.2;
+      const r = 1.6 + Math.pow(i / count, 0.7) * 4.4;
       const spread = (Math.random() - 0.5) * 0.45;
 
       const x = Math.cos(theta) * r + spread;
@@ -131,7 +131,7 @@ export default function Galaxy({
           }
         }}
       >
-        <sphereGeometry args={[0.7, 32, 32]} />
+        <sphereGeometry args={[1.2, 32, 32]} />
         <meshStandardMaterial
           color={data.color}
           emissive={data.color}
@@ -142,7 +142,7 @@ export default function Galaxy({
 
       {/* Pulsing Core Ring aura */}
       <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.9, 0.015, 8, 64]} />
+        <torusGeometry args={[1.5, 0.02, 8, 64]} />
         <meshBasicMaterial
           color={data.color}
           transparent
@@ -151,25 +151,25 @@ export default function Galaxy({
       </mesh>
 
       {/* Core Sun Label */}
-      <group ref={sunLabelRef} position={[0, 1.15, 0]}>
+      <group ref={sunLabelRef} position={[0, 1.85, 0]}>
         <Text
-          fontSize={0.24}
+          fontSize={0.46}
           color="white"
           anchorX="center"
           anchorY="middle"
-          outlineWidth={0.03}
+          outlineWidth={0.05}
           outlineColor="#000000"
           font={undefined}
         >
           {data.name}
         </Text>
         <Text
-          fontSize={0.11}
+          fontSize={0.2}
           color={data.color}
-          position={[0, -0.22, 0]}
+          position={[0, -0.38, 0]}
           anchorX="center"
           anchorY="middle"
-          outlineWidth={0.015}
+          outlineWidth={0.025}
           outlineColor="#000000"
         >
           {data.tagline}
@@ -195,7 +195,7 @@ export default function Galaxy({
           <bufferAttribute attach="attributes-color" args={[colors, 3]} />
         </bufferGeometry>
         <pointsMaterial
-          size={0.035}
+          size={0.055}
           vertexColors
           transparent
           opacity={isGalaxySelected ? 0.85 : 0.45}

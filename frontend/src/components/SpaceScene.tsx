@@ -261,7 +261,7 @@ function Minimap({ selectedGalaxyId, onSelectGalaxy }: MinimapProps) {
 
         {galaxies.map((g) => {
           const radiusScale = (g.orbitRadius / maxRadius) * (size / 2 - 10);
-          const angle = time * g.orbitSpeed * 3.5;
+          const angle = time * g.orbitSpeed * 3.5 + g.startAngle;
           const x = center + Math.cos(angle) * radiusScale;
           const y = center + Math.sin(angle) * radiusScale;
 
@@ -336,7 +336,7 @@ export default function SpaceScene({
             ref={controlsRef}
             enableZoom
             enablePan={false}
-            minDistance={3.5}
+            minDistance={1.5}
             maxDistance={48}
             autoRotate
             autoRotateSpeed={0.2}
