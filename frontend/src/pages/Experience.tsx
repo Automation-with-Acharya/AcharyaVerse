@@ -147,16 +147,16 @@ export default function Experience() {
         <div
           style={{
             position: "absolute",
-            left: "28px",
-            top: "40px",
-            bottom: "40px",
+            left: "44px",
+            top: "50px",
+            bottom: "50px",
             width: "2px",
-            background: "linear-gradient(180deg, #60a5fa, #f43f5e, #6d28d9)",
-            opacity: 0.4,
+            background: "linear-gradient(180deg, #60a5fa20, #f97316, #f43f5e, #6d28d980)",
+            opacity: 0.6,
           }}
         />
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           {timeline.map((event, i) => {
             const isOpen = expanded === event.year;
             return (
@@ -164,51 +164,65 @@ export default function Experience() {
                 key={event.year}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.07, duration: 0.4 }}
-                style={{ position: "relative", paddingLeft: "68px" }}
+                transition={{ delay: i * 0.07, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                style={{
+                  position: "relative",
+                  display: "grid",
+                  gridTemplateColumns: "90px 1fr",
+                  gap: "20px",
+                  alignItems: "flex-start",
+                }}
               >
                 {/* Year node */}
-                <div
-                  style={{
-                    position: "absolute",
-                    left: "0",
-                    top: "18px",
-                    width: "56px",
-                    height: "56px",
-                    borderRadius: "50%",
-                    background: `${event.color}18`,
-                    border: `2px solid ${event.color}50`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    boxShadow: `0 0 16px ${event.color}30`,
-                    zIndex: 1,
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "'Orbitron', monospace",
-                      fontSize: event.year === "Future" ? "0.6rem" : "0.7rem",
-                      fontWeight: 700,
-                      color: event.color,
-                      letterSpacing: "0.05em",
+                <div style={{ display: "flex", justifyContent: "center", paddingTop: "20px" }}>
+                  <motion.div
+                    animate={{
+                      boxShadow: isOpen
+                        ? [`0 0 20px ${event.color}60`, `0 0 40px ${event.color}80`, `0 0 20px ${event.color}60`]
+                        : `0 0 12px ${event.color}30`,
                     }}
+                    transition={{ duration: 2, repeat: isOpen ? Infinity : 0, ease: "easeInOut" }}
+                    style={{
+                      width: "62px",
+                      height: "62px",
+                      borderRadius: "50%",
+                      background: isOpen ? `${event.color}22` : `${event.color}10`,
+                      border: `2px solid ${isOpen ? event.color + "80" : event.color + "40"}`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      zIndex: 1,
+                      cursor: "pointer",
+                    }}
+                    onClick={() => setExpanded(isOpen ? null : event.year)}
                   >
-                    {event.year}
-                  </span>
+                    <span
+                      style={{
+                        fontFamily: "'Orbitron', monospace",
+                        fontSize: event.year === "Future" ? "0.55rem" : "0.65rem",
+                        fontWeight: 800,
+                        color: event.color,
+                        letterSpacing: "0.04em",
+                        textAlign: "center",
+                      }}
+                    >
+                      {event.year}
+                    </span>
+                  </motion.div>
                 </div>
 
                 {/* Card */}
                 <div
                   onClick={() => setExpanded(isOpen ? null : event.year)}
                   style={{
-                    background: isOpen ? `${event.color}0c` : "rgba(2,8,20,0.6)",
-                    border: `1px solid ${isOpen ? event.color + "40" : "rgba(255,255,255,0.07)"}`,
-                    borderRadius: "14px",
-                    padding: "20px 22px",
+                    background: isOpen ? `${event.color}08` : "rgba(2,8,20,0.55)",
+                    border: `1px solid ${isOpen ? event.color + "35" : "rgba(255,255,255,0.06)"}`,
+                    borderRadius: "16px",
+                    padding: "20px 26px",
                     cursor: "pointer",
                     transition: "all 0.25s ease",
-                    marginBottom: "10px",
+                    marginBottom: "8px",
+                    boxShadow: isOpen ? `0 4px 24px ${event.color}10` : "none",
                   }}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -216,7 +230,7 @@ export default function Experience() {
                       <h3
                         style={{
                           fontFamily: "'Orbitron', monospace",
-                          fontSize: "0.92rem",
+                          fontSize: "clamp(0.85rem, 1.5vw, 1rem)",
                           fontWeight: 700,
                           color: event.color,
                           letterSpacing: "0.04em",
@@ -244,8 +258,8 @@ export default function Experience() {
                             style={{
                               padding: "3px 10px",
                               borderRadius: "50px",
-                              background: `${event.color}12`,
-                              border: `1px solid ${event.color}25`,
+                              background: `${event.color}10`,
+                              border: `1px solid ${event.color}22`,
                               color: event.color,
                               fontFamily: "'Space Grotesk', sans-serif",
                               fontSize: "0.72rem",
@@ -256,7 +270,7 @@ export default function Experience() {
                         ))}
                       </div>
                     </div>
-                    <span style={{ color: "#475569", marginLeft: "12px", fontSize: "0.85rem" }}>
+                    <span style={{ color: "#334155", marginLeft: "16px", fontSize: "0.8rem" }}>
                       {isOpen ? "▲" : "▼"}
                     </span>
                   </div>
@@ -273,8 +287,8 @@ export default function Experience() {
                       >
                         <div
                           style={{
-                            marginTop: "16px",
-                            paddingTop: "16px",
+                            marginTop: "18px",
+                            paddingTop: "18px",
                             borderTop: `1px solid ${event.color}20`,
                           }}
                         >
@@ -282,9 +296,9 @@ export default function Experience() {
                             style={{
                               fontFamily: "'Space Grotesk', sans-serif",
                               color: "#94a3b8",
-                              fontSize: "0.875rem",
-                              lineHeight: 1.7,
-                              marginBottom: event.highlight ? "14px" : 0,
+                              fontSize: "0.9rem",
+                              lineHeight: 1.8,
+                              marginBottom: event.highlight ? "18px" : 0,
                             }}
                           >
                             {event.details}
@@ -292,16 +306,17 @@ export default function Experience() {
                           {event.highlight && (
                             <div
                               style={{
-                                display: "inline-flex",
+                                display: "flex",
                                 alignItems: "center",
-                                gap: "8px",
-                                padding: "8px 16px",
-                                background: `${event.color}14`,
-                                border: `1px solid ${event.color}35`,
-                                borderRadius: "8px",
+                                gap: "10px",
+                                padding: "12px 20px",
+                                background: `${event.color}12`,
+                                border: `1px solid ${event.color}30`,
+                                borderLeft: `4px solid ${event.color}`,
+                                borderRadius: "0 10px 10px 0",
                                 fontFamily: "'Space Grotesk', sans-serif",
                                 color: event.color,
-                                fontSize: "0.82rem",
+                                fontSize: "0.85rem",
                                 fontWeight: 600,
                               }}
                             >
@@ -319,7 +334,7 @@ export default function Experience() {
         </div>
       </div>
 
-      <div style={{ height: "48px" }} />
+      <div style={{ height: "60px" }} />
     </PlanetPageLayout>
   );
 }
