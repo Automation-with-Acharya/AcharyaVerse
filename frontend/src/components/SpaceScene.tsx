@@ -1,6 +1,6 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Stars, OrbitControls } from "@react-three/drei";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, Suspense } from "react";
 import * as THREE from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
@@ -320,32 +320,34 @@ export default function SpaceScene({
         gl={{ antialias: true, alpha: false, toneMappingExposure: 1.25 }}
         style={{ background: "#000004" }}
       >
-        <SceneContent
-          selectedGalaxyId={selectedGalaxyId}
-          setSelectedGalaxyId={setSelectedGalaxyId}
-          selectedPlanet={selectedPlanet}
-          setSelectedPlanet={setSelectedPlanet}
-          controlsRef={controlsRef}
-        />
-        <OrbitControls
-          ref={controlsRef}
-          enableZoom
-          enablePan={false}
-          minDistance={3.5}
-          maxDistance={48}
-          autoRotate
-          autoRotateSpeed={0.2}
-          enableDamping
-          dampingFactor={0.05}
-        />
-        <EffectComposer>
-          <Bloom
-            luminanceThreshold={0.55}
-            luminanceSmoothing={0.3}
-            intensity={1.2}
-            radius={0.8}
+        <Suspense fallback={null}>
+          <SceneContent
+            selectedGalaxyId={selectedGalaxyId}
+            setSelectedGalaxyId={setSelectedGalaxyId}
+            selectedPlanet={selectedPlanet}
+            setSelectedPlanet={setSelectedPlanet}
+            controlsRef={controlsRef}
           />
-        </EffectComposer>
+          <OrbitControls
+            ref={controlsRef}
+            enableZoom
+            enablePan={false}
+            minDistance={3.5}
+            maxDistance={48}
+            autoRotate
+            autoRotateSpeed={0.2}
+            enableDamping
+            dampingFactor={0.05}
+          />
+          <EffectComposer>
+            <Bloom
+              luminanceThreshold={0.55}
+              luminanceSmoothing={0.3}
+              intensity={1.2}
+              radius={0.8}
+            />
+          </EffectComposer>
+        </Suspense>
       </Canvas>
 
       {/* Render Universe Breadcrumbs Navigation HUD */}

@@ -141,7 +141,7 @@ export default function Galaxy({
           anchorY="middle"
           outlineWidth={0.03}
           outlineColor="#000000"
-          font="https://fonts.gstatic.com/s/orbitron/v30/yJnKeUzGLcbfapGOWEPX3k7u.woff"
+          font={undefined}
         >
           {data.name}
         </Text>
