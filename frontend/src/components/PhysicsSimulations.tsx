@@ -1509,6 +1509,216 @@ export function LabButton({
   );
 }
 
+// ─────────────────────────────────────────────────────────
+// SPECIAL RELATIVITY VISUALIZER — time dilation & length contraction
+// ─────────────────────────────────────────────────────────
+
+function RelativityScene({ velocity, timeDilation, paused }: {
+  velocity: number;
+  timeDilation: number;
+  paused: boolean;
+}) {
+  const clock1Ref = useRef<THREE.Group>(null);
+  const clock2Ref = useRef<THREE.Group>(null);
+  const photon1Ref = useRef<THREE.Mesh>(null);
+  const photon2Ref = useRef<THREE.Mesh>(null);
+
+  // Constants
+  const height = 4.0; // Distance between mirrors
+  const width1 = 2.0; // Stationary mirror width
+  const c = 3.0;      // Speed of light unit in simulation
+
+  // We track local times for both clocks
+  const timeStationary = useRef(0);
+  const timeMoving = useRef(0);
+
+  // Track coordinates for moving clock trajectory
+  const posX = useRef(0);
+
+  useFrame((_, delta) => {
+    if (paused) return;
+
+    // Stationary clock ticks at normal speed
+    timeStationary.current += delta * 1.5;
+    // Moving clock ticks slower by 1 / timeDilation (Lorentz factor gamma)
+    timeMoving.current += (delta * 1.5) / timeDilation;
+
+    // Move the moving clock horizontally
+    posX.current += velocity * delta * 2.2;
+    if (posX.current > 7) {
+      posX.current = -7; // wrap around
+    }
+
+    // --- Stationary Photon bounce ---
+    // The photon travels vertically up and down between y = -height/2 and y = height/2
+    const totalDist1 = timeStationary.current * c;
+    const cyclePos1 = totalDist1 % (height * 2);
+    const py1 = cyclePos1 <= height ? -height/2 + cyclePos1 : height/2 - (cyclePos1 - height);
+
+    if (photon1Ref.current) {
+      photon1Ref.current.position.set(-3.5, py1, 0);
+    }
+
+    // --- Moving Photon bounce (in stationary frame) ---
+    // In its own frame, moving photon travels vertically, but ticks slower.
+    const totalDist2 = timeMoving.current * c;
+    const cyclePos2 = totalDist2 % (height * 2);
+    const py2 = cyclePos2 <= height ? -height/2 + cyclePos2 : height/2 - (cyclePos2 - height);
+
+    if (photon2Ref.current) {
+      photon2Ref.current.position.set(posX.current, py2, 0);
+    }
+
+    if (clock2Ref.current) {
+      clock2Ref.current.position.x = posX.current;
+    }
+  });
+
+  // Length contraction along direction of motion (X-axis)
+  const contractedWidth = width1 / timeDilation;
+
+  return (
+    <>
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[2, 5, 2]} intensity={1.5} color="#e0e7ff" />
+      <Stars radius={50} depth={20} count={2000} factor={2} fade />
+
+      {/* Grid Floor */}
+      <gridHelper args={[30, 30, "#312e81", "#1e1b4b"]} position={[0, -2.8, 0]} />
+
+      {/* ── STATIONARY CLOCK (Left) ── */}
+      <group ref={clock1Ref} position={[-3.5, 0, 0]}>
+        {/* Top Mirror */}
+        <mesh position={[0, height / 2 + 0.1, 0]}>
+          <boxGeometry args={[width1, 0.15, 1]} />
+          <meshStandardMaterial color="#60a5fa" emissive="#2563eb" emissiveIntensity={0.6} roughness={0.1} />
+        </mesh>
+        {/* Bottom Mirror */}
+        <mesh position={[0, -height / 2 - 0.1, 0]}>
+          <boxGeometry args={[width1, 0.15, 1]} />
+          <meshStandardMaterial color="#60a5fa" emissive="#2563eb" emissiveIntensity={0.6} roughness={0.1} />
+        </mesh>
+        {/* Connection Pillar (transparent coordinate guide) */}
+        <mesh position={[0, 0, -0.4]}>
+          <cylinderGeometry args={[0.03, 0.03, height]} />
+          <meshBasicMaterial color="#334155" transparent opacity={0.25} />
+        </mesh>
+      </group>
+
+      {/* Stationary Photon (Blue glow) */}
+      <mesh ref={photon1Ref}>
+        <sphereGeometry args={[0.18, 16, 16]} />
+        <meshBasicMaterial color="#60a5fa" />
+        <pointLight color="#60a5fa" intensity={4} distance={6} />
+      </mesh>
+
+
+      {/* ── MOVING CLOCK (Right) ── */}
+      <group ref={clock2Ref}>
+        {/* Top contracted Mirror */}
+        <mesh position={[0, height / 2 + 0.1, 0]}>
+          <boxGeometry args={[contractedWidth, 0.15, 1]} />
+          <meshStandardMaterial color="#f43f5e" emissive="#e11d48" emissiveIntensity={0.8} roughness={0.1} />
+        </mesh>
+        {/* Bottom contracted Mirror */}
+        <mesh position={[0, -height / 2 - 0.1, 0]}>
+          <boxGeometry args={[contractedWidth, 0.15, 1]} />
+          <meshStandardMaterial color="#f43f5e" emissive="#e11d48" emissiveIntensity={0.8} roughness={0.1} />
+        </mesh>
+        {/* Connection Pillar */}
+        <mesh position={[0, 0, -0.4]}>
+          <cylinderGeometry args={[0.03, 0.03, height]} />
+          <meshBasicMaterial color="#475569" transparent opacity={0.2} />
+        </mesh>
+      </group>
+
+      {/* Moving Photon (Red glow) */}
+      <mesh ref={photon2Ref}>
+        <sphereGeometry args={[0.18, 16, 16]} />
+        <meshBasicMaterial color="#f43f5e" />
+        <pointLight color="#f43f5e" intensity={4} distance={6} />
+      </mesh>
+    </>
+  );
+}
+
+export function RelativitySim() {
+  const [vFactor, setVFactor] = useState(0.8); // Velocity as fraction of c (v/c)
+  const [paused, setPaused]   = useState(false);
+
+  // Derived Relativity metrics
+  // gamma = 1 / sqrt(1 - beta^2)
+  const beta = Math.min(0.999, Math.max(0, vFactor));
+  const gamma = 1 / Math.sqrt(1 - beta * beta);
+  const lengthContractionPercent = ((1 - 1 / gamma) * 100).toFixed(1);
+
+  return (
+    <div style={{ position: "relative", background: "#020210" }}>
+      <Canvas camera={{ position: [0, 0, 8], fov: 50 }} style={{ height: "75vh", width: "100%", display: "block" }}>
+        <RelativityScene velocity={beta} timeDilation={gamma} paused={paused} />
+      </Canvas>
+
+      {/* Floating HUD controls — bottom left */}
+      <div
+        style={{
+          position: "absolute", bottom: "16px", left: "16px",
+          background: "rgba(2,2,15,0.85)", backdropFilter: "blur(20px)",
+          border: "1px solid rgba(167,139,250,0.25)", borderRadius: "16px",
+          padding: "20px 22px", zIndex: 10, minWidth: "280px",
+        }}
+      >
+        <div style={{ fontFamily: "'Orbitron', monospace", fontSize: "0.65rem", color: "#a78bfa", letterSpacing: "0.15em", marginBottom: "14px" }}>
+          RELATIVITY CONTROLS
+        </div>
+        <SliderControl
+          label="Relative Velocity (v/c)"
+          value={vFactor} min={0.0} max={0.99} step={0.01} unit=" c"
+          color="#a78bfa" onChange={setVFactor}
+        />
+        <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
+          <LabButton color="#a78bfa" onClick={() => setPaused(!paused)}>
+            {paused ? "▶ Resume" : "⏸ Pause"}
+          </LabButton>
+          <LabButton color="#64748b" onClick={() => { setVFactor(0.8); setPaused(false); }}>
+            ↺ Reset
+          </LabButton>
+        </div>
+      </div>
+
+      {/* Relativity Metrics HUD — top right */}
+      <div
+        style={{
+          position: "absolute", top: "16px", right: "16px",
+          background: "rgba(2,2,15,0.82)", backdropFilter: "blur(20px)",
+          border: "1px solid rgba(167,139,250,0.2)", borderRadius: "14px",
+          padding: "16px 18px", zIndex: 10, minWidth: "220px",
+        }}
+      >
+        <div style={{ fontFamily: "'Orbitron', monospace", fontSize: "0.6rem", color: "#a78bfa", letterSpacing: "0.15em", marginBottom: "12px" }}>
+          RELATIVISTIC EFFECTS
+        </div>
+        {[
+          { label: "Lorentz Factor (\u03b3)", value: gamma.toFixed(4), color: "#a78bfa" },
+          { label: "Time Dilation", value: `1s clock = ${gamma.toFixed(2)}s outside`, color: "#60a5fa" },
+          { label: "Length Contraction", value: `-${lengthContractionPercent}% size`, color: "#f43f5e" },
+          { label: "Lorentz contraction", value: `${(100 / gamma).toFixed(1)}% original width`, color: "#34d399" },
+        ].map(s => (
+          <div key={s.label} style={{ marginBottom: "10px" }}>
+            <div style={{ fontFamily: "'Orbitron', monospace", fontSize: "0.85rem", color: s.color, fontWeight: 700 }}>{s.value}</div>
+            <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.68rem", color: "#64748b" }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      <PhysicsFact color="#a78bfa">
+        🚀 Special Relativity: The speed of light is constant for all observers. To keep light speed constant,
+        time must slow down (Time Dilation) and lengths must contract (Length Contraction) inside moving frames.
+        Observe the moving clock (red) contract horizontally and its photon (red) bounce slower as velocity approaches 1.0c.
+      </PhysicsFact>
+    </div>
+  );
+}
+
 export function PhysicsFact({ children, color }: { children: React.ReactNode; color: string }) {
   return (
     <div

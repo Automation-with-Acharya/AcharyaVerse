@@ -7,6 +7,7 @@ import {
   WaveInterferenceSim,
   NBodySim,
   PendulumSim,
+  RelativitySim,
 } from "../components/PhysicsSimulations";
 
 type Experiment = {
@@ -37,6 +38,15 @@ const experiments: Experiment[] = [
     tagline: "Gravitational singularity, accretion disk & relativistic jets",
     branch: "General Relativity",
     component: <BlackHoleSim />,
+  },
+  {
+    id: "relativity",
+    label: "Special Relativity",
+    emoji: "🚀",
+    color: "#a78bfa",
+    tagline: "Time dilation, Lorentz factor & length contraction",
+    branch: "Relativity",
+    component: <RelativitySim />,
   },
   {
     id: "pendulum",
