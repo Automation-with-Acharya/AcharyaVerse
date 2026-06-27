@@ -120,7 +120,7 @@ export default function Contact() {
                 <p
                   style={{
                     fontFamily: "'Orbitron', monospace",
-                    fontSize: "0.82rem",
+                    fontSize: "0.95rem",
                     fontWeight: 700,
                     color: card.color,
                     letterSpacing: "0.08em",
@@ -132,8 +132,8 @@ export default function Contact() {
                 <p
                   style={{
                     fontFamily: "'Space Grotesk', sans-serif",
-                    color: "#94a3b8",
-                    fontSize: "0.78rem",
+                    color: "#cbd5e1",
+                    fontSize: "0.92rem",
                   }}
                 >
                   {card.value}
@@ -143,9 +143,9 @@ export default function Contact() {
             <p
               style={{
                 fontFamily: "'Space Grotesk', sans-serif",
-                color: "#64748b",
-                fontSize: "0.82rem",
-                lineHeight: 1.5,
+                color: "#94a3b8",
+                fontSize: "0.95rem",
+                lineHeight: 1.6,
               }}
             >
               {card.description}
@@ -155,7 +155,7 @@ export default function Contact() {
                 marginTop: "16px",
                 color: card.color,
                 fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: "0.78rem",
+                fontSize: "0.9rem",
                 fontWeight: 500,
               }}
             >
@@ -183,7 +183,7 @@ export default function Contact() {
         <h2
           style={{
             fontFamily: "'Orbitron', monospace",
-            fontSize: "0.9rem",
+            fontSize: "1.15rem",
             fontWeight: 700,
             color: "#22d3ee",
             letterSpacing: "0.15em",
@@ -214,8 +214,8 @@ export default function Contact() {
                 style={{
                   display: "block",
                   fontFamily: "'Space Grotesk', sans-serif",
-                  fontSize: "0.8rem",
-                  color: "#64748b",
+                  fontSize: "0.9rem",
+                  color: "#94a3b8",
                   letterSpacing: "0.05em",
                   marginBottom: "8px",
                   textTransform: "uppercase",
@@ -232,13 +232,13 @@ export default function Contact() {
                 required
                 style={{
                   width: "100%",
-                  padding: "12px 16px",
+                  padding: "14px 18px",
                   background: "rgba(2,8,20,0.8)",
                   border: "1px solid rgba(34,211,238,0.2)",
                   borderRadius: "10px",
                   color: "white",
                   fontFamily: "'Space Grotesk', sans-serif",
-                  fontSize: "0.9rem",
+                  fontSize: "1.02rem",
                   outline: "none",
                   transition: "border-color 0.2s ease",
                   boxSizing: "border-box",
@@ -253,8 +253,8 @@ export default function Contact() {
               style={{
                 display: "block",
                 fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: "0.8rem",
-                color: "#64748b",
+                fontSize: "0.9rem",
+                color: "#94a3b8",
                 letterSpacing: "0.05em",
                 marginBottom: "8px",
                 textTransform: "uppercase",
@@ -271,13 +271,13 @@ export default function Contact() {
               rows={5}
               style={{
                 width: "100%",
-                padding: "12px 16px",
+                padding: "14px 18px",
                 background: "rgba(2,8,20,0.8)",
                 border: "1px solid rgba(34,211,238,0.2)",
                 borderRadius: "10px",
                 color: "white",
                 fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: "0.9rem",
+                fontSize: "1.02rem",
                 outline: "none",
                 resize: "vertical",
                 boxSizing: "border-box",
@@ -299,7 +299,7 @@ export default function Contact() {
               border: "none",
               borderRadius: "10px",
               fontFamily: "'Orbitron', monospace",
-              fontSize: "0.82rem",
+              fontSize: "0.95rem",
               fontWeight: 600,
               letterSpacing: "0.1em",
               textTransform: "uppercase",

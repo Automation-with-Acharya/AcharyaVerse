@@ -126,7 +126,7 @@ export default function PlanetPageLayout({
             }}
           >✦</motion.div>
           <span style={{
-            fontFamily: "'Orbitron', monospace", fontSize: "0.68rem",
+            fontFamily: "'Orbitron', monospace", fontSize: "0.78rem",
             fontWeight: 700, color: accentColor, letterSpacing: "0.14em", textTransform: "uppercase",
           }}>
             {title}
@@ -138,10 +138,10 @@ export default function PlanetPageLayout({
           to="/"
           style={{
             display: "inline-flex", alignItems: "center", gap: "7px",
-            padding: "8px 18px", borderRadius: "50px",
+            padding: "9px 20px", borderRadius: "50px",
             background: "rgba(2,8,20,0.7)", backdropFilter: "blur(14px)",
             border: `1px solid ${accentColor}28`, color: accentColor,
-            fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.8rem",
+            fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.9rem",
             letterSpacing: "0.04em", textDecoration: "none", fontWeight: 500,
             transition: "all 0.25s ease",
           }}
@@ -178,7 +178,7 @@ export default function PlanetPageLayout({
             transition={{ delay: 0.2, duration: 0.6 }}
             style={{
               fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: "0.72rem",
+              fontSize: "0.85rem",
               fontWeight: 600,
               color: `${accentColor}80`,
               letterSpacing: "0.25em",
@@ -200,7 +200,7 @@ export default function PlanetPageLayout({
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             style={{
               fontFamily: "'Orbitron', monospace",
-              fontSize: "clamp(2.4rem, 6vw, 5rem)",
+              fontSize: "clamp(2.6rem, 6.5vw, 5.5rem)",
               fontWeight: 900,
               letterSpacing: "0.06em",
               color: accentColor,
@@ -219,10 +219,10 @@ export default function PlanetPageLayout({
               transition={{ delay: 0.5, duration: 0.7 }}
               style={{
                 fontFamily: "'Space Grotesk', sans-serif",
-                color: "#64748b",
-                fontSize: "clamp(0.9rem, 1.6vw, 1.15rem)",
+                color: "#94a3b8",
+                fontSize: "clamp(1.05rem, 2vw, 1.35rem)",
                 letterSpacing: "0.03em",
-                maxWidth: "560px",
+                maxWidth: "750px",
                 lineHeight: 1.6,
               }}
             >

@@ -234,7 +234,7 @@ export default function Projects() {
             <div
               style={{
                 fontFamily: "'Orbitron', monospace",
-                fontSize: "2rem",
+                fontSize: "2.4rem",
                 fontWeight: 900,
                 color: stat.color,
                 marginBottom: "4px",
@@ -243,7 +243,7 @@ export default function Projects() {
             >
               {stat.value}
             </div>
-            <div style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#475569", fontSize: "0.78rem" }}>
+            <div style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#94a3b8", fontSize: "0.92rem" }}>
               {stat.label}
             </div>
           </motion.div>
@@ -265,13 +265,13 @@ export default function Projects() {
               key={cat}
               onClick={() => setFilter(cat)}
               style={{
-                padding: "8px 20px",
+                padding: "10px 24px",
                 borderRadius: "50px",
                 border: `1px solid ${isActive ? "#60a5fa" : "rgba(255,255,255,0.1)"}`,
                 background: isActive ? "rgba(96,165,250,0.15)" : "transparent",
-                color: isActive ? "#60a5fa" : "#64748b",
+                color: isActive ? "#60a5fa" : "#94a3b8",
                 fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: "0.82rem",
+                fontSize: "0.92rem",
                 fontWeight: isActive ? 600 : 400,
                 cursor: "pointer",
                 transition: "all 0.2s ease",
@@ -287,9 +287,9 @@ export default function Projects() {
                   background: isActive ? "#60a5fa20" : "rgba(255,255,255,0.06)",
                   border: `1px solid ${isActive ? "#60a5fa40" : "rgba(255,255,255,0.08)"}`,
                   borderRadius: "50px",
-                  padding: "1px 7px",
-                  fontSize: "0.68rem",
-                  color: isActive ? "#60a5fa" : "#475569",
+                  padding: "2px 9px",
+                  fontSize: "0.78rem",
+                  color: isActive ? "#60a5fa" : "#64748b",
                 }}
               >
                 {count}
@@ -352,13 +352,13 @@ export default function Projects() {
                       <div>
                         <h3
                           style={{
-                            fontFamily: "'Orbitron', monospace", fontSize: "0.88rem",
+                            fontFamily: "'Orbitron', monospace", fontSize: "1.08rem",
                             fontWeight: 700, color: project.color, letterSpacing: "0.04em", marginBottom: "2px",
                           }}
                         >
                           {project.title}
                         </h3>
-                        <p style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#64748b", fontSize: "0.76rem" }}>
+                        <p style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#94a3b8", fontSize: "0.88rem" }}>
                           {project.subtitle}
                         </p>
                       </div>
@@ -367,16 +367,16 @@ export default function Projects() {
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "6px" }}>
                       <span
                         style={{
-                          padding: "3px 10px", borderRadius: "50px",
+                          padding: "4px 12px", borderRadius: "50px",
                           background: `${statusColors[project.status]}15`,
                           border: `1px solid ${statusColors[project.status]}30`,
                           color: statusColors[project.status],
-                          fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.68rem", fontWeight: 600,
+                          fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.78rem", fontWeight: 600,
                         }}
                       >
                         {project.status}
                       </span>
-                      <span style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#334155", fontSize: "0.66rem" }}>
+                      <span style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#475569", fontSize: "0.76rem" }}>
                         {project.year}
                       </span>
                     </div>
@@ -385,25 +385,25 @@ export default function Projects() {
                   {/* Impact metric */}
                   <div
                     style={{
-                      padding: "9px 13px", background: `${project.color}0c`,
+                      padding: "10px 15px", background: `${project.color}0c`,
                       border: `1px solid ${project.color}18`, borderRadius: "8px",
                       marginBottom: "12px", fontFamily: "'Space Grotesk', sans-serif",
-                      color: project.color, fontSize: "0.78rem", fontWeight: 500,
+                      color: project.color, fontSize: "0.92rem", fontWeight: 500,
                     }}
                   >
                     ✦ {project.impact}
                   </div>
 
                   {/* Tech stack pills */}
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "5px", marginBottom: "12px" }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "12px" }}>
                     {project.stack.map((tech) => (
                       <span
                         key={tech}
                         style={{
-                          padding: "3px 9px", borderRadius: "50px",
+                          padding: "4px 11px", borderRadius: "50px",
                           background: "rgba(255,255,255,0.04)",
                           border: "1px solid rgba(255,255,255,0.08)",
-                          color: "#64748b", fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.68rem",
+                          color: "#94a3b8", fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.8rem",
                         }}
                       >
                         {tech}
@@ -414,7 +414,7 @@ export default function Projects() {
                   {/* Expand toggle */}
                   <div
                     style={{
-                      color: "#334155", fontSize: "0.72rem", textAlign: "right",
+                      color: "#475569", fontSize: "0.82rem", textAlign: "right",
                       fontFamily: "'Space Grotesk', sans-serif",
                     }}
                   >
@@ -444,7 +444,7 @@ export default function Projects() {
                         <p
                           style={{
                             fontFamily: "'Space Grotesk', sans-serif",
-                            color: "#94a3b8", fontSize: "0.85rem", lineHeight: 1.75,
+                            color: "#e2e8f0", fontSize: "1.02rem", lineHeight: 1.75,
                             marginBottom: "18px",
                           }}
                         >
@@ -455,7 +455,7 @@ export default function Projects() {
                         <div style={{ marginBottom: "20px" }}>
                           <div
                             style={{
-                              fontFamily: "'Orbitron', monospace", fontSize: "0.6rem",
+                              fontFamily: "'Orbitron', monospace", fontSize: "0.75rem",
                               color: project.color, letterSpacing: "0.18em",
                               textTransform: "uppercase", marginBottom: "10px",
                             }}
@@ -470,8 +470,8 @@ export default function Projects() {
                                 marginBottom: "7px",
                               }}
                             >
-                              <span style={{ color: project.color, fontSize: "0.55rem", marginTop: "5px", flexShrink: 0 }}>✦</span>
-                              <span style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#64748b", fontSize: "0.8rem", lineHeight: 1.5 }}>
+                              <span style={{ color: project.color, fontSize: "0.65rem", marginTop: "5px", flexShrink: 0 }}>✦</span>
+                              <span style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#94a3b8", fontSize: "0.92rem", lineHeight: 1.5 }}>
                                 {h}
                               </span>
                             </div>
@@ -491,11 +491,11 @@ export default function Projects() {
                                 whileTap={{ scale: 0.97 }}
                                 style={{
                                   display: "inline-flex", alignItems: "center", gap: "7px",
-                                  padding: "9px 18px", borderRadius: "50px",
+                                  padding: "10px 20px", borderRadius: "50px",
                                   border: `1px solid ${project.color}40`,
                                   background: `${project.color}10`,
                                   color: project.color,
-                                  fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.78rem", fontWeight: 600,
+                                  fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.9rem", fontWeight: 600,
                                   textDecoration: "none", cursor: "pointer",
                                 }}
                               >
@@ -515,11 +515,11 @@ export default function Projects() {
                                 whileTap={{ scale: 0.97 }}
                                 style={{
                                   display: "inline-flex", alignItems: "center", gap: "7px",
-                                  padding: "9px 18px", borderRadius: "50px",
+                                  padding: "10px 20px", borderRadius: "50px",
                                   border: "1px solid rgba(255,255,255,0.12)",
                                   background: "rgba(255,255,255,0.05)",
                                   color: "#94a3b8",
-                                  fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.78rem", fontWeight: 500,
+                                  fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.9rem", fontWeight: 500,
                                   textDecoration: "none",
                                 }}
                               >

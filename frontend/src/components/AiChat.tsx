@@ -159,13 +159,13 @@ export default function AiChat() {
             whileTap={{ scale: 0.97 }}
             onClick={() => sendMessage(item.question)}
             style={{
-              padding: "7px 14px",
+              padding: "9px 18px",
               borderRadius: "50px",
               border: "1px solid rgba(167,139,250,0.3)",
               background: "rgba(167,139,250,0.08)",
               color: "#a78bfa",
               fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: "0.78rem",
+              fontSize: "0.88rem",
               cursor: "pointer",
               transition: "all 0.2s ease",
               letterSpacing: "0.02em",
@@ -232,7 +232,7 @@ export default function AiChat() {
                 <div
                   style={{
                     fontFamily: "'Space Grotesk', sans-serif",
-                    fontSize: "0.7rem",
+                    fontSize: "0.78rem",
                     color: "#475569",
                     marginBottom: "4px",
                     textAlign: msg.sender === "user" ? "right" : "left",
@@ -259,8 +259,8 @@ export default function AiChat() {
                         : "16px 16px 16px 4px",
                     color: "white",
                     fontFamily: "'Space Grotesk', sans-serif",
-                    fontSize: "0.875rem",
-                    lineHeight: 1.65,
+                    fontSize: "1rem",
+                    lineHeight: 1.7,
                   }}
                 >
                   {msg.text}
@@ -343,13 +343,13 @@ export default function AiChat() {
           placeholder="Ask me anything about Mayank..."
           style={{
             flex: 1,
-            padding: "14px 18px",
+            padding: "16px 20px",
             background: "rgba(2,8,20,0.8)",
             border: "1px solid rgba(167,139,250,0.25)",
             borderRadius: "12px",
             color: "white",
             fontFamily: "'Space Grotesk', sans-serif",
-            fontSize: "0.9rem",
+            fontSize: "1.02rem",
             outline: "none",
             transition: "border-color 0.2s ease",
           }}
@@ -361,14 +361,14 @@ export default function AiChat() {
           onClick={() => sendMessage()}
           disabled={isTyping}
           style={{
-            padding: "14px 22px",
+            padding: "16px 24px",
             background: "linear-gradient(135deg, #6d28d9, #a78bfa)",
             color: "white",
             border: "none",
             borderRadius: "12px",
             cursor: isTyping ? "not-allowed" : "pointer",
             fontFamily: "'Orbitron', monospace",
-            fontSize: "0.82rem",
+            fontSize: "0.95rem",
             fontWeight: 600,
             letterSpacing: "0.06em",
             opacity: isTyping ? 0.6 : 1,

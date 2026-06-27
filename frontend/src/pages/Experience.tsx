@@ -126,15 +126,16 @@ export default function Experience() {
             <div
               style={{
                 fontFamily: "'Orbitron', monospace",
-                fontSize: "1.6rem",
+                fontSize: "2.2rem",
                 fontWeight: 900,
                 color: stat.c,
                 marginBottom: "4px",
+                textShadow: `0 0 20px ${stat.c}30`,
               }}
             >
               {stat.v}
             </div>
-            <div style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#64748b", fontSize: "0.8rem" }}>
+            <div style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#94a3b8", fontSize: "0.92rem" }}>
               {stat.l}
             </div>
           </div>
@@ -230,11 +231,11 @@ export default function Experience() {
                       <h3
                         style={{
                           fontFamily: "'Orbitron', monospace",
-                          fontSize: "clamp(0.85rem, 1.5vw, 1rem)",
+                          fontSize: "clamp(1.05rem, 2vw, 1.28rem)",
                           fontWeight: 700,
                           color: event.color,
                           letterSpacing: "0.04em",
-                          marginBottom: "4px",
+                          marginBottom: "6px",
                         }}
                       >
                         {event.title}
@@ -242,8 +243,8 @@ export default function Experience() {
                       <p
                         style={{
                           fontFamily: "'Space Grotesk', sans-serif",
-                          color: "#64748b",
-                          fontSize: "0.82rem",
+                          color: "#94a3b8",
+                          fontSize: "0.98rem",
                           marginBottom: "12px",
                         }}
                       >
@@ -256,13 +257,13 @@ export default function Experience() {
                           <span
                             key={tag}
                             style={{
-                              padding: "3px 10px",
+                              padding: "4px 12px",
                               borderRadius: "50px",
                               background: `${event.color}10`,
                               border: `1px solid ${event.color}22`,
                               color: event.color,
                               fontFamily: "'Space Grotesk', sans-serif",
-                              fontSize: "0.72rem",
+                              fontSize: "0.85rem",
                             }}
                           >
                             {tag}
@@ -270,7 +271,7 @@ export default function Experience() {
                         ))}
                       </div>
                     </div>
-                    <span style={{ color: "#334155", marginLeft: "16px", fontSize: "0.8rem" }}>
+                    <span style={{ color: "#475569", marginLeft: "16px", fontSize: "1rem" }}>
                       {isOpen ? "▲" : "▼"}
                     </span>
                   </div>
@@ -295,8 +296,8 @@ export default function Experience() {
                           <p
                             style={{
                               fontFamily: "'Space Grotesk', sans-serif",
-                              color: "#94a3b8",
-                              fontSize: "0.9rem",
+                              color: "#e2e8f0",
+                              fontSize: "1.08rem",
                               lineHeight: 1.8,
                               marginBottom: event.highlight ? "18px" : 0,
                             }}
@@ -316,7 +317,7 @@ export default function Experience() {
                                 borderRadius: "0 10px 10px 0",
                                 fontFamily: "'Space Grotesk', sans-serif",
                                 color: event.color,
-                                fontSize: "0.85rem",
+                                fontSize: "1rem",
                                 fontWeight: 600,
                               }}
                             >

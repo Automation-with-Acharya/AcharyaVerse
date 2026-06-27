@@ -83,10 +83,10 @@ export default function Resume() {
           >
             Mayank Acharya
           </h2>
-          <p style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#94a3b8", fontSize: "1rem", marginBottom: "4px" }}>
+          <p style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#e2e8f0", fontSize: "1.15rem", marginBottom: "6px", fontWeight: 500 }}>
             Senior Software Engineer · Bank of America Continuum India
           </p>
-          <p style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#64748b", fontSize: "0.875rem", marginBottom: "20px" }}>
+          <p style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#94a3b8", fontSize: "1rem", marginBottom: "24px" }}>
             🚀 6+ years · Automation Expert · AI Enthusiast · Physics Lover
           </p>
 
@@ -101,13 +101,13 @@ export default function Resume() {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "8px",
-                padding: "11px 24px",
+                padding: "12px 26px",
                 background: "linear-gradient(135deg, #d97706, #f97316)",
                 color: "white",
                 borderRadius: "50px",
                 textDecoration: "none",
                 fontFamily: "'Orbitron', monospace",
-                fontSize: "0.78rem",
+                fontSize: "0.88rem",
                 fontWeight: 700,
                 letterSpacing: "0.1em",
                 boxShadow: "0 0 16px rgba(251,191,36,0.3)",
@@ -125,14 +125,14 @@ export default function Resume() {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "8px",
-                padding: "11px 20px",
+                padding: "12px 24px",
                 background: "rgba(251,191,36,0.08)",
                 color: "#fbbf24",
                 border: "1px solid rgba(251,191,36,0.3)",
                 borderRadius: "50px",
                 textDecoration: "none",
                 fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: "0.82rem",
+                fontSize: "0.92rem",
                 fontWeight: 600,
               }}
             >
@@ -167,11 +167,11 @@ export default function Resume() {
               textAlign: "center",
             }}
           >
-            <div style={{ fontSize: "2rem", marginBottom: "8px" }}>{item.icon}</div>
+            <div style={{ fontSize: "2.4rem", marginBottom: "8px" }}>{item.icon}</div>
             <div
               style={{
                 fontFamily: "'Orbitron', monospace",
-                fontSize: "1.8rem",
+                fontSize: "2.2rem",
                 fontWeight: 900,
                 color: item.color,
                 marginBottom: "4px",
@@ -179,7 +179,7 @@ export default function Resume() {
             >
               {item.value}
             </div>
-            <div style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#64748b", fontSize: "0.8rem" }}>
+            <div style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#94a3b8", fontSize: "0.92rem" }}>
               {item.label}
             </div>
           </motion.div>
@@ -196,9 +196,9 @@ export default function Resume() {
           padding: "28px",
           marginBottom: "36px",
           fontFamily: "'Space Grotesk', sans-serif",
-          color: "#94a3b8",
+          color: "#cbd5e1",
           lineHeight: 1.8,
-          fontSize: "0.95rem",
+          fontSize: "1.08rem",
         }}
       >
         <p style={{ marginBottom: "14px" }}>
@@ -236,7 +236,7 @@ export default function Resume() {
           <h3
             style={{
               fontFamily: "'Orbitron', monospace",
-              fontSize: "1rem",
+              fontSize: "1.15rem",
               color: "#fbbf24",
               letterSpacing: "0.05em",
               marginBottom: "6px",
@@ -244,10 +244,10 @@ export default function Resume() {
           >
             Bank of America Continuum India
           </h3>
-          <p style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#94a3b8", fontSize: "0.9rem" }}>
+          <p style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#94a3b8", fontSize: "1rem" }}>
             Senior Software Engineer · 2020 – Present
           </p>
-          <p style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#64748b", fontSize: "0.82rem", marginTop: "4px" }}>
+          <p style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#8892b0", fontSize: "0.9rem", marginTop: "4px" }}>
             Development · Automation · DevOps · Analytics · Release Management · Team Leadership
           </p>
         </div>
@@ -258,7 +258,7 @@ export default function Resume() {
             borderRadius: "8px",
             padding: "8px 16px",
             fontFamily: "'Orbitron', monospace",
-            fontSize: "0.8rem",
+            fontSize: "0.9rem",
             color: "#fbbf24",
             whiteSpace: "nowrap",
           }}
@@ -281,13 +281,13 @@ export default function Resume() {
           <span
             key={skill.name}
             style={{
-              padding: "6px 16px",
+              padding: "8px 18px",
               borderRadius: "50px",
               background: `${skill.color}12`,
               border: `1px solid ${skill.color}35`,
               color: skill.color,
               fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: "0.82rem",
+              fontSize: "0.92rem",
               fontWeight: 500,
               letterSpacing: "0.03em",
             }}
@@ -313,8 +313,8 @@ export default function Resume() {
               padding: "16px 20px",
             }}
           >
-            <span style={{ fontSize: "1.5rem" }}>{cert.icon}</span>
-            <span style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#94a3b8", fontSize: "0.9rem" }}>
+            <span style={{ fontSize: "1.8rem" }}>{cert.icon}</span>
+            <span style={{ fontFamily: "'Space Grotesk', sans-serif", color: "#e2e8f0", fontSize: "1.05rem", fontWeight: 500 }}>
               {cert.name}
             </span>
           </div>
@@ -333,7 +333,7 @@ export default function Resume() {
             color: "white",
             borderRadius: "10px",
             fontFamily: "'Orbitron', monospace",
-            fontSize: "0.82rem",
+            fontSize: "0.92rem",
             fontWeight: 600,
             letterSpacing: "0.1em",
             textTransform: "uppercase",
@@ -355,7 +355,7 @@ export default function Resume() {
             border: "1px solid rgba(255,255,255,0.12)",
             borderRadius: "10px",
             fontFamily: "'Orbitron', monospace",
-            fontSize: "0.82rem",
+            fontSize: "0.92rem",
             fontWeight: 600,
             letterSpacing: "0.1em",
             textTransform: "uppercase",
@@ -375,12 +375,13 @@ function SectionTitle({ children, color = "#60a5fa" }: { children: React.ReactNo
     <h2
       style={{
         fontFamily: "'Orbitron', monospace",
-        fontSize: "0.9rem",
+        fontSize: "1.15rem",
         fontWeight: 700,
         color,
         letterSpacing: "0.15em",
         textTransform: "uppercase",
-        marginBottom: "16px",
+        marginBottom: "20px",
+        marginTop: "32px",
         display: "flex",
         alignItems: "center",
         gap: "10px",
