@@ -64,7 +64,7 @@ function UniverseHome() {
 
       <PlanetInfo
         selectedGalaxyId={selectedGalaxyId}
-        selectedPlanet={selectedPlanet}
+        setSelectedGalaxyId={setSelectedGalaxyId}
         setSelectedPlanet={setSelectedPlanet}
       />
 

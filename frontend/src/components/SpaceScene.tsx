@@ -319,6 +319,10 @@ export default function SpaceScene({
         camera={{ position: [0, 5, 24], fov: 60 }}
         gl={{ antialias: true, alpha: false, toneMappingExposure: 1.25 }}
         style={{ background: "#000004" }}
+        onPointerMissed={() => {
+          setSelectedGalaxyId(null);
+          setSelectedPlanet(null);
+        }}
       >
         <Suspense fallback={null}>
           <SceneContent

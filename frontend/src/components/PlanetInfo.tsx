@@ -6,13 +6,24 @@ import { galaxies } from "../data/galaxies";
 
 type Props = {
   selectedGalaxyId: string | null;
-  selectedPlanet: SubPlanetData | null;
+  setSelectedGalaxyId: (id: string | null) => void;
   setSelectedPlanet: (planet: SubPlanetData | null) => void;
+};
+
+// Route mapping for each galaxy main landing page
+const GALAXY_ROUTES: Record<string, string> = {
+  resume: "/resume",
+  experience: "/experience",
+  projects: "/projects",
+  skills: "/skills",
+  "ai-mayank": "/ai-mayank",
+  "physics-lab": "/physics-lab",
+  contact: "/contact",
 };
 
 export default function PlanetInfo({
   selectedGalaxyId,
-  selectedPlanet,
+  setSelectedGalaxyId,
   setSelectedPlanet,
 }: Props) {
   const navigate = useNavigate();
@@ -21,32 +32,32 @@ export default function PlanetInfo({
   const activeGalaxy = galaxies.find((g) => g.id === selectedGalaxyId);
   const accentColor = activeGalaxy?.color ?? "#60a5fa";
 
-  // Use sub-planet attributes, or fallback to galaxy level
-  const emoji = selectedPlanet?.emoji ?? activeGalaxy?.emoji ?? "🪐";
-  const title = selectedPlanet ? `${planetLabel(selectedPlanet)}` : activeGalaxy?.name ?? "";
-  const subtitle = selectedPlanet
-    ? `${activeGalaxy?.name} Galaxy · Node Link`
-    : `${activeGalaxy?.tagline}`;
+  // Panel layout values are locked to the parent Galaxy level regardless of selected inner sub-planets
+  const emoji = activeGalaxy?.emoji ?? "🪐";
+  const title = activeGalaxy ? `${activeGalaxy.name.toUpperCase()} GALAXY` : "";
+  const subtitle = activeGalaxy?.tagline ?? "";
 
-  // Retrieve matching description from content data
+  // Retrieve description from content details matching the parent Galaxy key name
   const galaxyKey = activeGalaxy?.name as keyof typeof planetContent;
   const description = planetContent[galaxyKey]?.description ?? "";
 
   const handleOpen = () => {
-    if (selectedPlanet) {
-      navigate(planetPath(selectedPlanet));
+    if (selectedGalaxyId) {
+      const route = GALAXY_ROUTES[selectedGalaxyId];
+      if (route) navigate(route);
     }
   };
 
   const handleCancel = () => {
+    setSelectedGalaxyId(null);
     setSelectedPlanet(null);
   };
 
   return (
     <AnimatePresence>
-      {selectedPlanet && (
+      {selectedGalaxyId && activeGalaxy && (
         <motion.div
-          key={selectedPlanet.name}
+          key={activeGalaxy.id}
           initial={{ opacity: 0, x: 40, scale: 0.95 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
           exit={{ opacity: 0, x: 40, scale: 0.95 }}
@@ -66,7 +77,7 @@ export default function PlanetInfo({
             zIndex: 5,
           }}
         >
-          {/* Node Icon & Names */}
+          {/* Icon & Galaxy Title */}
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "14px" }}>
             <div
               style={{
@@ -88,7 +99,7 @@ export default function PlanetInfo({
               <h2
                 style={{
                   fontFamily: "'Orbitron', monospace",
-                  fontSize: "1rem",
+                  fontSize: "0.95rem",
                   fontWeight: 700,
                   color: accentColor,
                   letterSpacing: "0.08em",
@@ -112,7 +123,7 @@ export default function PlanetInfo({
             }}
           />
 
-          {/* Description Context */}
+          {/* Galaxy Description */}
           <p
             style={{
               color: "#94a3b8",
@@ -125,7 +136,7 @@ export default function PlanetInfo({
             {description}
           </p>
 
-          {/* Action CTAs */}
+          {/* Unified Galaxy Warp CTAs */}
           <div style={{ display: "flex", gap: "10px" }}>
             <motion.button
               whileHover={{ scale: 1.03, boxShadow: `0 0 20px ${accentColor}50` }}
@@ -139,13 +150,13 @@ export default function PlanetInfo({
                 borderRadius: "10px",
                 color: accentColor,
                 fontFamily: "'Orbitron', monospace",
-                fontSize: "0.78rem",
+                fontSize: "0.75rem",
                 fontWeight: 700,
-                letterSpacing: "0.15em",
+                letterSpacing: "0.08em",
                 cursor: "pointer",
               }}
             >
-              ✦ WARP TO NODE
+              ✦ ENTER {activeGalaxy.name.toUpperCase()} GALAXY
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.03 }}
@@ -169,33 +180,4 @@ export default function PlanetInfo({
       )}
     </AnimatePresence>
   );
-}
-
-// Subplanet helper label
-function planetLabel(planet: SubPlanetData): string {
-  if (planet.name === "LLM Chat") return "AI MAYANK";
-  if (planet.name === "Orbits") return "PHYSICS LAB";
-  return planet.name;
-}
-
-// Subplanet path resolver
-function planetPath(planet: SubPlanetData): string {
-  if (planet.name === "Biography") return "/resume";
-  if (planet.name === "Achievements") return "/resume";
-  if (planet.name === "Bank of America") return "/experience";
-  if (planet.name === "Team Lead") return "/experience";
-  if (planet.name === "AcharyaVerse") return "/projects";
-  if (planet.name === "AI Mayank") return "/projects";
-  if (planet.name === "RPA Automation") return "/projects";
-  if (planet.name === "Development") return "/skills";
-  if (planet.name === "Automation Skills") return "/skills";
-  if (planet.name === "DevOps release") return "/skills";
-  if (planet.name === "LLM Chat") return "/ai-mayank";
-  if (planet.name === "Knowledge base") return "/ai-mayank";
-  if (planet.name === "Orbits") return "/physics-lab";
-  if (planet.name === "Singularity") return "/physics-lab";
-  if (planet.name === "Relativity clock") return "/physics-lab";
-  if (planet.name === "LinkedIn") return "/contact";
-  if (planet.name === "GitHub") return "/contact";
-  return planet.path;
 }

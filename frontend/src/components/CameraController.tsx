@@ -39,7 +39,7 @@ const GALAXY_ZOOM_OFFSET = 5.5;
 const PLANET_ZOOM_OFFSET = 1.8;
 
 // Overview position (default universe overview)
-const OVERVIEW_POSITION = new THREE.Vector3(0, 5, 24);
+const OVERVIEW_POSITION = new THREE.Vector3(0, 16, 26);
 const OVERVIEW_TARGET   = new THREE.Vector3(0, 0, 0);
 
 // Transition durations in seconds
@@ -76,8 +76,8 @@ export default function CameraController({
 
   // Initialize camera overview on mount (intro phase)
   useEffect(() => {
-    camera.position.set(0, 15, 35);
-    startPos.current.set(0, 15, 35);
+    camera.position.set(0, 20, 36);
+    startPos.current.set(0, 20, 36);
     elapsed.current = 0;
     phaseRef.current = "intro";
 
