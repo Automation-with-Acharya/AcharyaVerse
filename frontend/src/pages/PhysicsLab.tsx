@@ -1,14 +1,26 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PlanetPageLayout from "../components/PlanetPageLayout";
-import {
-  SolarSystemSim,
-  BlackHoleSim,
-  WaveInterferenceSim,
-  NBodySim,
-  PendulumSim,
-  RelativitySim,
-} from "../components/PhysicsSimulations";
+
+// Lazy-load each heavy simulation component to split code chunks and optimize performance
+const SolarSystemSim = lazy(() =>
+  import("../components/PhysicsSimulations").then((m) => ({ default: m.SolarSystemSim }))
+);
+const BlackHoleSim = lazy(() =>
+  import("../components/PhysicsSimulations").then((m) => ({ default: m.BlackHoleSim }))
+);
+const RelativitySim = lazy(() =>
+  import("../components/PhysicsSimulations").then((m) => ({ default: m.RelativitySim }))
+);
+const PendulumSim = lazy(() =>
+  import("../components/PhysicsSimulations").then((m) => ({ default: m.PendulumSim }))
+);
+const WaveInterferenceSim = lazy(() =>
+  import("../components/PhysicsSimulations").then((m) => ({ default: m.WaveInterferenceSim }))
+);
+const NBodySim = lazy(() =>
+  import("../components/PhysicsSimulations").then((m) => ({ default: m.NBodySim }))
+);
 
 type Experiment = {
   id: string;
@@ -17,7 +29,7 @@ type Experiment = {
   color: string;
   tagline: string;
   branch: string;
-  component: React.ReactNode;
+  Component: React.ComponentType;
 };
 
 const experiments: Experiment[] = [
@@ -28,7 +40,7 @@ const experiments: Experiment[] = [
     color: "#fbbf24",
     tagline: "Orbital mechanics with live spacetime curvature grid",
     branch: "Classical Mechanics",
-    component: <SolarSystemSim />,
+    Component: SolarSystemSim,
   },
   {
     id: "blackhole",
@@ -37,7 +49,7 @@ const experiments: Experiment[] = [
     color: "#f43f5e",
     tagline: "Gravitational singularity, accretion disk & relativistic jets",
     branch: "General Relativity",
-    component: <BlackHoleSim />,
+    Component: BlackHoleSim,
   },
   {
     id: "relativity",
@@ -46,7 +58,7 @@ const experiments: Experiment[] = [
     color: "#a78bfa",
     tagline: "Time dilation, Lorentz factor & length contraction",
     branch: "Relativity",
-    component: <RelativitySim />,
+    Component: RelativitySim,
   },
   {
     id: "pendulum",
@@ -55,7 +67,7 @@ const experiments: Experiment[] = [
     color: "#34d399",
     tagline: "Simple & double pendulum — RK4 integration with chaos",
     branch: "Classical Mechanics",
-    component: <PendulumSim />,
+    Component: PendulumSim,
   },
   {
     id: "wave",
@@ -64,7 +76,7 @@ const experiments: Experiment[] = [
     color: "#a78bfa",
     tagline: "Two-source superposition & constructive/destructive patterns",
     branch: "Wave Physics",
-    component: <WaveInterferenceSim />,
+    Component: WaveInterferenceSim,
   },
   {
     id: "nbody",
@@ -73,7 +85,7 @@ const experiments: Experiment[] = [
     color: "#f97316",
     tagline: "Gravitational many-body problem — sensitivity to initial conditions",
     branch: "Chaos Theory",
-    component: <NBodySim />,
+    Component: NBodySim,
   },
 ];
 
@@ -297,11 +309,51 @@ export default function PhysicsLab() {
               transition={{ duration: 0.35 }}
               style={{ flex: 1 }}
             >
-              {current.component}
+              <Suspense fallback={<LoadingSpinner color={current.color} />}>
+                <current.Component />
+              </Suspense>
             </motion.div>
           </AnimatePresence>
         </div>
       </div>
     </PlanetPageLayout>
+  );
+}
+
+function LoadingSpinner({ color }: { color: string }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "75vh",
+        background: "#000005",
+        gap: "16px",
+      }}
+    >
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+        style={{
+          width: "48px",
+          height: "48px",
+          borderRadius: "50%",
+          border: `3px solid ${color}15`,
+          borderTopColor: color,
+        }}
+      />
+      <div
+        style={{
+          fontFamily: "'Orbitron', monospace",
+          fontSize: "0.8rem",
+          color,
+          letterSpacing: "0.1em",
+        }}
+      >
+        LOADING QUANTUM ENVIRONMENT...
+      </div>
+    </div>
   );
 }
